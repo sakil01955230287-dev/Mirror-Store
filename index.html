@@ -1,0 +1,4027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRROR STORE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f1f5f9;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #1e293b;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header Styles */
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #334155;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: auto;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .app-name {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #3b82f6, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #f1f5f9;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn:hover {
+            background-color: #334155;
+        }
+
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            color: #f1f5f9;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .admin-btn {
+            background: none;
+            border: none;
+            color: #f1f5f9;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-btn:hover {
+            background-color: #334155;
+        }
+
+        .admin-logout {
+            background-color: #dc2626;
+        }
+
+        .admin-logout:hover {
+            background-color: #b91c1c;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 16px 12px;
+            gap: 8px;
+            scrollbar-width: none;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            background-color: #334155;
+            color: #cbd5e1;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .category-btn:hover {
+            background-color: #475569;
+        }
+
+        .category-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Admin Controls */
+        .admin-controls {
+            padding: 12px 16px;
+            background-color: rgba(30, 65, 119, 0.2);
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            gap: 8px;
+        }
+
+        .admin-controls button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .add-app-btn {
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            color: white;
+        }
+
+        .add-app-btn:hover {
+            opacity: 0.9;
+        }
+
+        .manage-featured-btn {
+            background: linear-gradient(to right, #059669, #10b981);
+            color: white;
+        }
+
+        .manage-featured-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: absolute;
+            top: 80px;
+            left: 16px;
+            right: 16px;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            z-index: 50;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: #f1f5f9;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .menu-item:hover {
+            background-color: #334155;
+        }
+
+        /* Content Area */
+        .content {
+            padding-bottom: 80px;
+            overflow-y: auto;
+            max-height: calc(100vh - 160px);
+        }
+
+        /* Featured Section */
+        .featured-section {
+            background: linear-gradient(to right, #1e293b, #1e3a8a, #1e293b);
+            padding: 24px 16px;
+        }
+
+        .featured-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .featured-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .featured-action-btn {
+            padding: 6px 12px;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .featured-action-btn:hover {
+            background-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .featured-card {
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .featured-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .featured-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .featured-info {
+            flex: 1;
+        }
+
+        .featured-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .featured-info p {
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .featured-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .featured-install-btn {
+            padding: 12px 24px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .featured-install-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .featured-install-btn.installed {
+            background-color: #475569;
+        }
+
+        /* Apps List */
+        .apps-section {
+            padding: 24px 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .app-card {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .app-card:hover {
+            background-color: #334155;
+        }
+
+        .app-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .app-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .app-developer {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+
+        .star-icon {
+            color: #fbbf24;
+        }
+
+        .app-downloads {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .app-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .install-btn {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .install-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .install-btn.installed {
+            background-color: #475569;
+        }
+
+        .admin-action-btn {
+            padding: 8px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .admin-action-btn.delete {
+            background-color: #dc2626;
+        }
+
+        .admin-action-btn.featured {
+            background-color: #059669;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+            max-width: 500px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            z-index: 90;
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover {
+            color: #cbd5e1;
+        }
+
+        .nav-item.active {
+            color: #60a5fa;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Detail View */
+        .detail-header {
+            position: sticky;
+            top: 0;
+            background-color: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background-color: #334155;
+        }
+
+        .detail-title {
+            font-weight: 600;
+            color: white;
+        }
+
+        .detail-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .detail-header-info {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .detail-icon {
+            width: 96px;
+            height: 96px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .detail-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-text-info {
+            flex: 1;
+        }
+
+        .detail-app-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .detail-developer {
+            color: #60a5fa;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .detail-tags {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .detail-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-action-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .install-action-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .install-action-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .install-action-btn.installed {
+            background-color: #334155;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .admin-actions .detail-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .edit-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .set-featured-btn {
+            background-color: #059669;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background-color: #334155;
+            border-radius: 12px;
+            padding: 16px 8px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .screenshots-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .screenshots-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .screenshot {
+            flex-shrink: 0;
+            width: 192px;
+            height: 384px;
+            background-color: #334155;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .screenshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .additional-images-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .additional-images-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .additional-image {
+            background-color: #334155;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            position: relative;
+        }
+
+        .additional-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .additional-image:hover .remove-image-btn {
+            opacity: 1;
+        }
+
+        .add-image-form {
+            background-color: #334155;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .add-image-form h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .add-image-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-image-input {
+            flex: 1;
+            padding: 12px;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .add-image-btn {
+            padding: 12px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .about-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .about-text {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .app-details {
+            background-color: #334155;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            color: #94a3b8;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: white;
+        }
+
+        .reviews-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Reviews System */
+        .review-form-container {
+            background-color: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .review-form-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .review-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rating-label {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 4px;
+        }
+
+        .rating-star {
+            font-size: 24px;
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .rating-star:hover,
+        .rating-star.active {
+            color: #fbbf24;
+        }
+
+        .review-input {
+            padding: 12px;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .review-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .review-submit-btn {
+            padding: 12px;
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .review-submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .review-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .review-form-note {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .reviews-container {
+            background-color: #334155;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .reviews-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .reviews-count {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reviewer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .avatar-male-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .avatar-male-2 { background: linear-gradient(135deg, #059669, #047857); }
+        .avatar-male-3 { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+        .avatar-female-1 { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .avatar-female-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .reviewer-info {
+            flex: 1;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .review-date {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .review-rating-display {
+            display: flex;
+            gap: 2px;
+        }
+
+        .review-rating-display .star {
+            color: #fbbf24;
+            font-size: 14px;
+        }
+
+        .review-content {
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .review-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .review-action-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .review-action-btn:hover {
+            background-color: #334155;
+            color: white;
+        }
+
+        .admin-reply {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 8px;
+        }
+
+        .admin-reply-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .admin-reply-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            background: linear-gradient(to bottom right, #2563eb, #1e40af);
+        }
+
+        .admin-reply-name {
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .admin-reply-content {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .reply-form {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #475569;
+        }
+
+        .reply-input {
+            width: 100%;
+            padding: 8px;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 8px;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .reply-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .reply-submit-btn {
+            padding: 6px 12px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .reply-cancel-btn {
+            padding: 6px 12px;
+            background-color: #475569;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 32px;
+            color: #94a3b8;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal {
+            background-color: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #475569;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background-color: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .close-btn:hover {
+            background-color: #334155;
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid.cols-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .form-grid.cols-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: white;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 12px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .icon-preview-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .icon-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            overflow: hidden;
+        }
+
+        .icon-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .color-picker-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-picker-label {
+            font-weight: 500;
+            color: white;
+            font-size: 14px;
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .screenshot-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .screenshot-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .screenshot-preview {
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 9/16;
+            position: relative;
+        }
+
+        .screenshot-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-screenshot-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .add-screenshot-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .additional-images-preview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .additional-images-preview {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .additional-image-preview {
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            position: relative;
+        }
+
+        .additional-image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-additional-image-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .additional-image-preview:hover .remove-additional-image-btn {
+            opacity: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+        }
+
+        .submit-btn {
+            flex: 1;
+            padding: 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .submit-btn:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            flex: 1;
+            padding: 16px;
+            background-color: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: #475569;
+        }
+
+        /* Featured Apps Modal */
+        .featured-apps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .featured-app-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: #334155;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .featured-app-item:hover {
+            background-color: #475569;
+        }
+
+        .featured-app-item.selected {
+            background-color: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+        }
+
+        .featured-app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .featured-app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .featured-app-info {
+            flex: 1;
+        }
+
+        .featured-app-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .featured-app-developer {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .featured-app-check {
+            color: #10b981;
+            font-size: 20px;
+        }
+
+        /* Admin Login */
+        .admin-login-container {
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #0f172a, #1e3a8a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .admin-login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .admin-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(to bottom right, #2563eb, #1e40af);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .admin-login-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .admin-login-subtitle {
+            color: #94a3b8;
+        }
+
+        .admin-login-form {
+            background-color: #1e293b;
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid #475569;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .login-input {
+            padding: 16px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .error-message {
+            padding: 16px;
+            background-color: rgba(220, 38, 38, 0.2);
+            border: 1px solid #dc2626;
+            border-radius: 12px;
+            color: #fca5a5;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #2563eb, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+
+        .back-to-store-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .empty-state {
+            padding: 48px 16px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-2 {
+            gap: 8px;
+        }
+
+        .gap-4 {
+            gap: 16px;
+        }
+
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .mt-8 {
+            margin-top: 32px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #3b82f6;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- Admin Login View (Initially Hidden) -->
+        <div id="admin-login-view" class="admin-login-container hidden">
+            <div class="admin-login-card">
+                <div class="admin-login-header">
+                    <div class="admin-icon">
+                        <i class="fas fa-cog fa-2x"></i>
+                    </div>
+                    <h1 class="admin-login-title">Admin Portal</h1>
+                    <p class="admin-login-subtitle">Enter your credentials to manage MIRROR STORE</p>
+                </div>
+
+                <form id="admin-login-form" class="admin-login-form">
+                    <div class="login-form-group">
+                        <label for="admin-id" class="form-label">Admin ID</label>
+                        <input type="text" id="admin-id" class="login-input" placeholder="Enter admin ID" autocomplete="off">
+                    </div>
+
+                    <div class="login-form-group">
+                        <label for="passcode" class="form-label">Passcode</label>
+                        <input type="password" id="passcode" class="login-input" placeholder="Enter passcode" autocomplete="off">
+                    </div>
+
+                    <div id="login-error" class="error-message hidden"></div>
+
+                    <button type="submit" class="login-btn">Login to Admin Panel</button>
+                    
+                    <button type="button" id="back-to-store-btn" class="back-to-store-btn">
+                        ← Back to Store
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main App View -->
+        <div id="main-app-view">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-top">
+                    <button id="menu-toggle" class="menu-btn">
+                        <i class="fas fa-bars fa-lg"></i>
+                    </button>
+                    <div class="logo-container">
+                        <img src="https://i.ibb.co.com/hJCt1BMP/Picsart-26-01-03-19-21-09-763.png" alt="MIRROR STORE Logo" class="logo">
+                        <span class="app-name">MIRROR STORE</span>
+                    </div>
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search apps & games">
+                    </div>
+                    <button id="admin-btn" class="admin-btn">
+                        <i class="fas fa-cog fa-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories">
+                    <button class="category-btn active" data-category="all">
+                        <i class="fas fa-home"></i>
+                        <span>For you</span>
+                    </button>
+                    <button class="category-btn" data-category="games">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Games</span>
+                    </button>
+                    <button class="category-btn" data-category="entertainment">
+                        <i class="fas fa-film"></i>
+                        <span>Entertainment</span>
+                    </button>
+                    <button class="category-btn" data-category="finance">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Finance</span>
+                    </button>
+                    <button class="category-btn" data-category="technology">
+                        <i class="fas fa-microchip"></i>
+                        <span>Technology</span>
+                    </button>
+                </div>
+
+                <!-- Admin Controls -->
+                <div id="admin-controls" class="admin-controls hidden">
+                    <button id="add-app-btn" class="add-app-btn">
+                        <i class="fas fa-plus"></i>
+                        Add New App
+                    </button>
+                    <button id="manage-featured-btn" class="manage-featured-btn">
+                        <i class="fas fa-star"></i>
+                        Manage Featured
+                    </button>
+                    <button id="manage-recommended-btn" class="manage-featured-btn">
+                        <i class="fas fa-thumbs-up"></i>
+                        Manage Recommended
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu hidden">
+                <button class="menu-item" data-category="all">
+                    <i class="fas fa-home"></i>
+                    <span>For you</span>
+                </button>
+                <button class="menu-item" data-category="games">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Games</span>
+                </button>
+                <button class="menu-item" data-category="entertainment">
+                    <i class="fas fa-film"></i>
+                    <span>Entertainment</span>
+                </button>
+                <button class="menu-item" data-category="finance">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Finance</span>
+                </button>
+                <button class="menu-item" data-category="technology">
+                    <i class="fas fa-microchip"></i>
+                    <span>Technology</span>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div id="content" class="content">
+                <!-- Home View (Default) -->
+                <div id="home-view">
+                    <!-- Featured Section -->
+                    <div class="featured-section">
+                        <h2 class="featured-title">
+                            Featured App
+                            <div class="featured-actions" id="featured-actions" style="display: none;">
+                                <button class="featured-action-btn" id="change-featured-btn">
+                                    <i class="fas fa-exchange-alt"></i>
+                                    Change
+                                </button>
+                            </div>
+                        </h2>
+                        <div id="featured-card" class="featured-card">
+                            <div class="featured-icon" id="featured-icon" style="background: linear-gradient(to bottom right, #2563eb, #1e40af);">📷</div>
+                            <div class="featured-info">
+                                <h3 id="featured-name">Loading...</h3>
+                                <p id="featured-developer">Loading...</p>
+                                <div class="featured-rating">
+                                    <span id="featured-rating">0.0</span>
+                                    <i class="fas fa-star star-icon"></i>
+                                </div>
+                            </div>
+                            <button id="featured-install-btn" class="featured-install-btn">Install</button>
+                        </div>
+                    </div>
+
+                    <!-- Apps List -->
+                    <div class="apps-section">
+                        <h3 class="section-title" id="section-title">Recommended for you</h3>
+                        <div id="apps-list">
+                            <div class="empty-state">
+                                <div class="loading" style="margin: 0 auto 16px;"></div>
+                                <p>Loading apps...</p>
+                            </div>
+                        </div>
+                        <div id="empty-state" class="empty-state hidden">
+                            No apps found in this category
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail View (Hidden by default) -->
+                <div id="detail-view" class="hidden">
+                    <!-- Detail view will be dynamically rendered -->
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-items">
+                    <button class="nav-item active" data-category="all">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </button>
+                    <button class="nav-item" data-category="games">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Games</span>
+                    </button>
+                    <button class="nav-item" data-category="entertainment">
+                        <i class="fas fa-film"></i>
+                        <span>Entertainment</span>
+                    </button>
+                    <button class="nav-item" id="contact-btn">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>Contact</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit App Modal -->
+        <div id="app-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h2 id="modal-title" class="modal-title">Add New App</h2>
+                        <p id="modal-subtitle" class="modal-subtitle">All changes are saved to database</p>
+                    </div>
+                    <button id="close-modal-btn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <form id="app-form">
+                        <div class="form-grid cols-2 mb-4">
+                            <div class="form-group">
+                                <label for="app-name" class="form-label">App Name *</label>
+                                <input type="text" id="app-name" class="form-input" placeholder="Enter app name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="app-developer" class="form-label">Developer *</label>
+                                <input type="text" id="app-developer" class="form-input" placeholder="Enter developer name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid cols-3 mb-4">
+                            <div class="form-group">
+                                <label for="app-category" class="form-label">Category *</label>
+                                <select id="app-category" class="form-select">
+                                    <option value="games">Games</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="finance">Finance</option>
+                                    <option value="technology">Technology</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="app-rating" class="form-label">Rating (0-5) *</label>
+                                <input type="number" id="app-rating" class="form-input" min="0" max="5" step="0.1" value="4.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="app-downloads" class="form-label">Downloads *</label>
+                                <input type="text" id="app-downloads" class="form-input" placeholder="e.g., 100M+">
+                            </div>
+                        </div>
+
+                        <div class="form-grid cols-3 mb-4">
+                            <div class="form-group">
+                                <label for="app-size" class="form-label">Size *</label>
+                                <input type="text" id="app-size" class="form-input" placeholder="e.g., 45 MB">
+                            </div>
+                            <div class="form-group">
+                                <label for="app-version" class="form-label">Version *</label>
+                                <input type="text" id="app-version" class="form-input" placeholder="e.g., 1.0.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="app-apk-link" class="form-label">APK Download Link *</label>
+                                <input type="url" id="app-apk-link" class="form-input" placeholder="https://example.com/app.apk">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="icon-preview-container">
+                                <div id="icon-preview" class="icon-preview"></div>
+                                <div class="color-picker-group">
+                                    <label for="icon-color" class="color-picker-label">Icon Background Color</label>
+                                    <input type="color" id="icon-color" class="color-picker" value="#2563eb">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <input type="text" id="app-icon" class="form-input mb-2" placeholder="Enter emoji or image URL">
+                                <p class="text-sm text-gray-400">Use an emoji or provide a direct image URL for the app icon</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="app-description" class="form-label">Description *</label>
+                            <textarea id="app-description" class="form-textarea" rows="4" placeholder="Enter app description"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Screenshots (Image URLs)</label>
+                            <div id="screenshots-container" class="screenshot-grid"></div>
+                            <div class="add-screenshot-form">
+                                <input type="text" id="new-screenshot-url" class="form-input flex-1" placeholder="Add more screenshot URL">
+                                <button type="button" id="add-screenshot-btn" class="add-image-btn">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Additional Images (Optional)</label>
+                            <div id="additional-images-container" class="additional-images-preview"></div>
+                            <div class="add-screenshot-form">
+                                <input type="text" id="new-additional-image-url" class="form-input flex-1" placeholder="Enter image URL to add">
+                                <button type="button" id="add-additional-image-btn" class="add-image-btn">Add Image</button>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="submit-app-btn" class="submit-btn">
+                                <span id="submit-app-text">Add App</span>
+                                <div id="submit-app-loading" class="loading hidden" style="width: 20px; height: 20px;"></div>
+                            </button>
+                            <button type="button" id="cancel-app-btn" class="cancel-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Apps Modal -->
+        <div id="featured-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h2 id="featured-modal-title" class="modal-title">Manage Featured App</h2>
+                        <p class="modal-subtitle">Select an app to feature on the home page</p>
+                    </div>
+                    <button id="close-featured-modal-btn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div class="featured-apps-list" id="featured-apps-list">
+                        <!-- Apps will be dynamically added here -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="set-featured-btn" class="submit-btn">Set as Featured</button>
+                        <button type="button" id="cancel-featured-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Recommended Apps Modal -->
+        <div id="recommended-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Manage Recommended Apps</h2>
+                        <p class="modal-subtitle">Select apps to show in "Recommended for you" section</p>
+                    </div>
+                    <button id="close-recommended-modal-btn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div class="featured-apps-list" id="recommended-apps-list">
+                        <!-- Apps will be dynamically added here -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="save-recommended-btn" class="submit-btn">Save Changes</button>
+                        <button type="button" id="cancel-recommended-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxARYyVkN6XVYT7uS4rYBi5svqZ4Lu_vA",
+            authDomain: "mirror-store-9ae47.firebaseapp.com",
+            projectId: "mirror-store-9ae47",
+            storageBucket: "mirror-store-9ae47.firebasestorage.app",
+            messagingSenderId: "602875045492",
+            appId: "1:602875045492:web:6eb757b411046f228a1321"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // App State
+        const state = {
+            isAdmin: false,
+            showAdminLogin: false,
+            currentView: 'home',
+            selectedApp: null,
+            selectedCategory: 'all',
+            searchQuery: '',
+            menuOpen: false,
+            installedApps: new Set(), // No pre-installed apps
+            editingApp: null,
+            featuredAppId: null,
+            selectedFeaturedAppId: null,
+            recommendedAppIds: [],
+            selectedRecommendedAppIds: [],
+            apps: [],
+            newApp: {
+                name: '',
+                developer: '',
+                category: 'games',
+                rating: 4.0,
+                downloads: '0',
+                size: '',
+                icon: '',
+                iconColor: '#2563eb',
+                description: '',
+                screenshots: ['', '', ''],
+                version: '',
+                updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                apkLink: '',
+                additionalImages: [],
+                reviews: []
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            adminLoginView: document.getElementById('admin-login-view'),
+            mainAppView: document.getElementById('main-app-view'),
+            menuToggle: document.getElementById('menu-toggle'),
+            mobileMenu: document.getElementById('mobile-menu'),
+            searchInput: document.getElementById('search-input'),
+            adminBtn: document.getElementById('admin-btn'),
+            adminControls: document.getElementById('admin-controls'),
+            addAppBtn: document.getElementById('add-app-btn'),
+            manageFeaturedBtn: document.getElementById('manage-featured-btn'),
+            manageRecommendedBtn: document.getElementById('manage-recommended-btn'),
+            categoryBtns: document.querySelectorAll('.category-btn, .menu-item, .nav-item'),
+            contactBtn: document.getElementById('contact-btn'),
+            homeView: document.getElementById('home-view'),
+            detailView: document.getElementById('detail-view'),
+            content: document.getElementById('content'),
+            appsList: document.getElementById('apps-list'),
+            emptyState: document.getElementById('empty-state'),
+            featuredCard: document.getElementById('featured-card'),
+            featuredIcon: document.getElementById('featured-icon'),
+            featuredName: document.getElementById('featured-name'),
+            featuredDeveloper: document.getElementById('featured-developer'),
+            featuredRating: document.getElementById('featured-rating'),
+            featuredInstallBtn: document.getElementById('featured-install-btn'),
+            sectionTitle: document.getElementById('section-title'),
+            featuredActions: document.getElementById('featured-actions'),
+            changeFeaturedBtn: document.getElementById('change-featured-btn'),
+            adminLoginForm: document.getElementById('admin-login-form'),
+            adminIdInput: document.getElementById('admin-id'),
+            passcodeInput: document.getElementById('passcode'),
+            loginError: document.getElementById('login-error'),
+            backToStoreBtn: document.getElementById('back-to-store-btn'),
+            appModal: document.getElementById('app-modal'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
+            modalTitle: document.getElementById('modal-title'),
+            modalSubtitle: document.getElementById('modal-subtitle'),
+            appForm: document.getElementById('app-form'),
+            appName: document.getElementById('app-name'),
+            appDeveloper: document.getElementById('app-developer'),
+            appCategory: document.getElementById('app-category'),
+            appRating: document.getElementById('app-rating'),
+            appDownloads: document.getElementById('app-downloads'),
+            appSize: document.getElementById('app-size'),
+            appVersion: document.getElementById('app-version'),
+            appApkLink: document.getElementById('app-apk-link'),
+            appIcon: document.getElementById('app-icon'),
+            iconColor: document.getElementById('icon-color'),
+            iconPreview: document.getElementById('icon-preview'),
+            appDescription: document.getElementById('app-description'),
+            screenshotsContainer: document.getElementById('screenshots-container'),
+            newScreenshotUrl: document.getElementById('new-screenshot-url'),
+            addScreenshotBtn: document.getElementById('add-screenshot-btn'),
+            additionalImagesContainer: document.getElementById('additional-images-container'),
+            newAdditionalImageUrl: document.getElementById('new-additional-image-url'),
+            addAdditionalImageBtn: document.getElementById('add-additional-image-btn'),
+            submitAppBtn: document.getElementById('submit-app-btn'),
+            submitAppText: document.getElementById('submit-app-text'),
+            submitAppLoading: document.getElementById('submit-app-loading'),
+            cancelAppBtn: document.getElementById('cancel-app-btn'),
+            featuredModal: document.getElementById('featured-modal'),
+            closeFeaturedModalBtn: document.getElementById('close-featured-modal-btn'),
+            featuredAppsList: document.getElementById('featured-apps-list'),
+            setFeaturedBtn: document.getElementById('set-featured-btn'),
+            cancelFeaturedBtn: document.getElementById('cancel-featured-btn'),
+            recommendedModal: document.getElementById('recommended-modal'),
+            closeRecommendedModalBtn: document.getElementById('close-recommended-modal-btn'),
+            recommendedAppsList: document.getElementById('recommended-apps-list'),
+            saveRecommendedBtn: document.getElementById('save-recommended-btn'),
+            cancelRecommendedBtn: document.getElementById('cancel-recommended-btn')
+        };
+
+        // Utility Functions
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
+
+        function toggleElement(element) {
+            element.classList.toggle('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = type === 'success' ? '#10b981' : '#dc2626';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Firebase Functions
+        async function loadAppsFromFirebase() {
+            try {
+                const snapshot = await db.collection('apps').get();
+                state.apps = [];
+                snapshot.forEach(doc => {
+                    state.apps.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Load settings
+                const settingsDoc = await db.collection('settings').doc('appSettings').get();
+                if (settingsDoc.exists) {
+                    const settings = settingsDoc.data();
+                    state.featuredAppId = settings.featuredAppId || null;
+                    state.recommendedAppIds = settings.recommendedAppIds || [];
+                }
+                
+                renderApps();
+                updateFeaturedApp();
+            } catch (error) {
+                console.error('Error loading apps:', error);
+                showToast('Error loading apps', 'error');
+            }
+        }
+
+        async function saveAppToFirebase(appData, isEditing = false) {
+            try {
+                if (isEditing && state.editingApp) {
+                    await db.collection('apps').doc(state.editingApp.id).update(appData);
+                    showToast('App updated successfully!');
+                } else {
+                    // Generate new ID
+                    const newId = Date.now().toString();
+                    await db.collection('apps').doc(newId).set({
+                        ...appData,
+                        id: newId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('App added successfully!');
+                }
+                return true;
+            } catch (error) {
+                console.error('Error saving app:', error);
+                showToast('Error saving app', 'error');
+                return false;
+            }
+        }
+
+        async function deleteAppFromFirebase(appId) {
+            try {
+                await db.collection('apps').doc(appId).delete();
+                showToast('App deleted successfully!');
+                return true;
+            } catch (error) {
+                console.error('Error deleting app:', error);
+                showToast('Error deleting app', 'error');
+                return false;
+            }
+        }
+
+        async function updateSettings(field, value) {
+            try {
+                await db.collection('settings').doc('appSettings').set({
+                    [field]: value
+                }, { merge: true });
+                return true;
+            } catch (error) {
+                console.error('Error updating settings:', error);
+                showToast('Error updating settings', 'error');
+                return false;
+            }
+        }
+
+        async function addReviewToFirebase(appId, review) {
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
+                
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    reviews.unshift(review);
+                    
+                    await appRef.update({ reviews: reviews });
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error adding review:', error);
+                return false;
+            }
+        }
+
+        async function updateReviewInFirebase(appId, reviewIndex, review) {
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
+                
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    reviews[reviewIndex] = review;
+                    
+                    await appRef.update({ reviews: reviews });
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error updating review:', error);
+                return false;
+            }
+        }
+
+        async function deleteReviewFromFirebase(appId, reviewIndex) {
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
+                
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    reviews.splice(reviewIndex, 1);
+                    
+                    await appRef.update({ reviews: reviews });
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                return false;
+            }
+        }
+
+        function setActiveCategory(categoryId) {
+            elements.categoryBtns.forEach(btn => {
+                const btnCategory = btn.getAttribute('data-category');
+                if (btnCategory === categoryId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            state.selectedCategory = categoryId;
+            updateSectionTitle();
+            renderApps();
+        }
+
+        function updateSectionTitle() {
+            const titles = {
+                'all': 'Recommended for you',
+                'games': 'Popular Games',
+                'entertainment': 'Top Entertainment',
+                'finance': 'Finance Apps',
+                'technology': 'Technology Apps'
+            };
+            elements.sectionTitle.textContent = titles[state.selectedCategory] || 'Recommended for you';
+        }
+
+        function getFilteredApps() {
+            let result = [...state.apps];
+            
+            if (state.selectedCategory !== 'all') {
+                result = result.filter(app => app.category === state.selectedCategory);
+            } else {
+                result = result.filter(app => state.recommendedAppIds.includes(app.id));
+            }
+            
+            if (state.searchQuery) {
+                const query = state.searchQuery.toLowerCase();
+                result = result.filter(app => 
+                    app.name.toLowerCase().includes(query) ||
+                    app.developer.toLowerCase().includes(query)
+                );
+            }
+            
+            return result;
+        }
+
+        function getAvatarClass(name) {
+            const maleNames = ['john', 'mike', 'david', 'robert', 'alex', 'michael', 'chris', 'daniel', 'james', 'william'];
+            const femaleNames = ['sarah', 'emma', 'lisa', 'anna', 'maria', 'sophia', 'olivia', 'emily', 'chloe', 'grace'];
+            
+            const lowerName = name.toLowerCase().split(' ')[0];
+            
+            if (femaleNames.some(fn => lowerName.includes(fn) || lowerName.endsWith('a') || lowerName.endsWith('e') || lowerName.endsWith('ie'))) {
+                return Math.random() > 0.5 ? 'avatar-female-1' : 'avatar-female-2';
+            } else {
+                const maleAvatars = ['avatar-male-1', 'avatar-male-2', 'avatar-male-3'];
+                return maleAvatars[Math.floor(Math.random() * maleAvatars.length)];
+            }
+        }
+
+        // Render Functions
+        function renderApps() {
+            const filteredApps = getFilteredApps();
+            elements.appsList.innerHTML = '';
+            
+            if (filteredApps.length === 0) {
+                showElement(elements.emptyState);
+                return;
+            }
+            
+            hideElement(elements.emptyState);
+            
+            filteredApps.forEach(app => {
+                const appElement = createAppElement(app);
+                elements.appsList.appendChild(appElement);
+            });
+        }
+
+        function createAppElement(app) {
+            const isInstalled = state.installedApps.has(app.id);
+            const isFeatured = state.featuredAppId === app.id;
+            
+            const appElement = document.createElement('div');
+            appElement.className = 'app-card';
+            appElement.dataset.appId = app.id;
+            
+            appElement.innerHTML = `
+                <div class="app-card-content" style="display: flex; gap: 12px; width: 100%;">
+                    <div class="app-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'};">
+                        ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">` : (app.icon || '📱')}
+                    </div>
+                    <div class="app-info" style="flex: 1; min-width: 0;">
+                        <div class="app-name">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24; font-size: 12px;"></i>' : ''}</div>
+                        <div class="app-developer">${app.developer}</div>
+                        <div class="app-meta">
+                            <div class="app-rating">
+                                <span>${app.rating || '4.0'}</span>
+                                <i class="fas fa-star star-icon"></i>
+                            </div>
+                            <div class="app-downloads">${app.downloads || '0'}</div>
+                        </div>
+                    </div>
+                    <div class="app-actions">
+                        ${state.isAdmin ? `
+                            ${!isFeatured ? `
+                                <button class="admin-action-btn featured set-featured-list-btn" data-app-id="${app.id}" title="Set as Featured">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            ` : ''}
+                            <button class="admin-action-btn edit-app-btn" data-app-id="${app.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="admin-action-btn delete delete-app-btn" data-app-id="${app.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : `
+                            <button class="install-btn ${isInstalled ? 'installed' : ''}" data-app-id="${app.id}">
+                                ${isInstalled ? 'Installed' : 'Install'}
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            const appCardContent = appElement.querySelector('.app-card-content');
+            appCardContent.addEventListener('click', (e) => {
+                if (!e.target.closest('.app-actions')) {
+                    viewAppDetails(app.id);
+                }
+            });
+            
+            if (state.isAdmin) {
+                const setFeaturedBtn = appElement.querySelector('.set-featured-list-btn');
+                const editBtn = appElement.querySelector('.edit-app-btn');
+                const deleteBtn = appElement.querySelector('.delete-app-btn');
+                
+                if (setFeaturedBtn) {
+                    setFeaturedBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        setAsFeatured(app.id);
+                    });
+                }
+                
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editApp(app.id);
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteApp(app.id);
+                });
+            } else {
+                const installBtn = appElement.querySelector('.install-btn');
+                installBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleInstallApp(app.id);
+                });
+            }
+            
+            return appElement;
+        }
+
+        function updateFeaturedApp() {
+            const featuredApp = state.apps.find(app => app.id === state.featuredAppId);
+            if (!featuredApp) {
+                elements.featuredName.textContent = 'No featured app';
+                elements.featuredDeveloper.textContent = 'Select a featured app';
+                elements.featuredRating.textContent = '0.0';
+                elements.featuredIcon.innerHTML = '📱';
+                elements.featuredInstallBtn.textContent = 'Install';
+                elements.featuredInstallBtn.className = 'featured-install-btn';
+                return;
+            }
+            
+            const isInstalled = state.installedApps.has(featuredApp.id);
+            
+            elements.featuredIcon.style.background = featuredApp.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)';
+            if (featuredApp.icon && featuredApp.icon.startsWith('http')) {
+                elements.featuredIcon.innerHTML = `<img src="${featuredApp.icon}" alt="${featuredApp.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">`;
+            } else {
+                elements.featuredIcon.textContent = featuredApp.icon || '📱';
+            }
+            
+            elements.featuredName.textContent = featuredApp.name;
+            elements.featuredDeveloper.textContent = featuredApp.developer;
+            elements.featuredRating.textContent = featuredApp.rating || '4.0';
+            
+            elements.featuredInstallBtn.textContent = isInstalled ? 'Installed' : 'Install';
+            elements.featuredInstallBtn.className = isInstalled ? 'featured-install-btn installed' : 'featured-install-btn';
+            
+            if (state.isAdmin) {
+                showElement(elements.featuredActions);
+            } else {
+                hideElement(elements.featuredActions);
+            }
+            
+            elements.featuredCard.onclick = () => viewAppDetails(featuredApp.id);
+            
+            elements.featuredInstallBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleInstallApp(featuredApp.id);
+            };
+            
+            elements.changeFeaturedBtn.onclick = (e) => {
+                e.stopPropagation();
+                openFeaturedModal();
+            };
+        }
+
+        function viewAppDetails(appId) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app) return;
+            
+            state.selectedApp = app;
+            state.currentView = 'detail';
+            renderDetailView();
+            switchView('detail');
+        }
+
+        function renderDetailView() {
+            if (!state.selectedApp) return;
+            
+            const app = state.selectedApp;
+            const isInstalled = state.installedApps.has(app.id);
+            const isFeatured = state.featuredAppId === app.id;
+            
+            const detailHTML = `
+                <div class="detail-header">
+                    <button id="back-btn" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span class="detail-title">App Details</span>
+                </div>
+                
+                <div class="detail-content">
+                    <div class="detail-header-info">
+                        <div class="detail-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'}">
+                            ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">` : (app.icon || '📱')}
+                        </div>
+                        <div class="detail-text-info">
+                            <h1 class="detail-app-name">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24;"></i>' : ''}</h1>
+                            <p class="detail-developer">${app.developer}</p>
+                            <p class="detail-tags">Contains ads · In-app purchases</p>
+                        </div>
+                    </div>
+                    
+                    ${!state.isAdmin ? `
+                        <div class="detail-actions">
+                            <button class="detail-action-btn install-action-btn ${isInstalled ? 'installed' : ''}" id="detail-install-btn">
+                                ${isInstalled ? '✓ Installed' : 'Install App'}
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="admin-actions">
+                            ${!isFeatured ? `
+                                <button class="detail-action-btn set-featured-btn" id="detail-set-featured-btn">
+                                    <i class="fas fa-star"></i>
+                                    Set as Featured
+                                </button>
+                            ` : ''}
+                            <button class="detail-action-btn edit-btn" id="detail-edit-btn">
+                                <i class="fas fa-edit"></i>
+                                Edit App
+                            </button>
+                            <button class="detail-action-btn delete-btn" id="detail-delete-btn">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    `}
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${app.rating || '4.0'} <i class="fas fa-star" style="color: #fbbf24;"></i></div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-download" style="color: #60a5fa; font-size: 20px; margin-bottom: 8px;"></i>
+                            <div class="stat-value">${app.downloads || '0'}</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${app.size || '0 MB'}</div>
+                            <div class="stat-label">Size</div>
+                        </div>
+                    </div>
+                    
+                    <div class="screenshots-section">
+                        <h2>Screenshots</h2>
+                        <div class="screenshots-container">
+                            ${(app.screenshots || []).slice(0, 3).map((ss, i) => `
+                                <div class="screenshot">
+                                    ${ss ? `<img src="${ss}" alt="Screenshot ${i + 1}">` : `
+                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                                            <i class="fas fa-image fa-2x"></i>
+                                        </div>
+                                    `}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${app.additionalImages && app.additionalImages.length > 0 ? `
+                        <div class="additional-images-section">
+                            <h2>Additional Images</h2>
+                            <div class="additional-images-grid">
+                                ${app.additionalImages.map((img, i) => `
+                                    <div class="additional-image">
+                                        <img src="${img}" alt="Additional Image ${i + 1}">
+                                        ${state.isAdmin ? `
+                                            <button class="remove-image-btn" data-image-index="${i}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${state.isAdmin ? `
+                        <div class="add-image-form">
+                            <h3>Add Additional Image</h3>
+                            <div class="add-image-input-group">
+                                <input type="text" id="detail-new-image-url" class="add-image-input" placeholder="Enter image URL">
+                                <button type="button" id="detail-add-image-btn" class="add-image-btn">Add</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="about-section">
+                        <h2>About this app</h2>
+                        <p class="about-text">${app.description || 'No description available.'}</p>
+                        
+                        <div class="app-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Updated on</span>
+                                <span class="detail-value">${app.updated || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Version</span>
+                                <span class="detail-value">${app.version || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Size</span>
+                                <span class="detail-value">${app.size || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Downloads</span>
+                                <span class="detail-value">${app.downloads || '0'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="reviews-section">
+                        <h2>
+                            <i class="fas fa-comment-dots"></i>
+                            User Reviews & Feedback
+                        </h2>
+                        
+                        <div class="review-form-container">
+                            <h3 class="review-form-title">Write a Review</h3>
+                            <form id="review-form">
+                                <input type="hidden" name="app_id" value="${app.id}">
+                                <input type="hidden" name="app_name" value="${app.name}">
+                                <input type="hidden" name="review_rating" id="review-rating-value" value="5">
+                                <input type="hidden" name="_subject" value="New Review for ${app.name}">
+                                <input type="hidden" name="_template" value="table">
+                                <input type="hidden" name="_captcha" value="false">
+                                
+                                <div class="review-input-group">
+                                    <div class="review-rating">
+                                        <span class="rating-label">Your Rating:</span>
+                                        <div class="rating-stars" id="rating-stars">
+                                            ${Array(5).fill().map((_, i) => `
+                                                <i class="fas fa-star rating-star ${i < 5 ? 'active' : ''}" data-rating="${i + 1}"></i>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="text" name="reviewer_name" class="review-input" placeholder="Your Name" required>
+                                    
+                                    <textarea name="review_comment" class="review-input" placeholder="Write your review here..." required></textarea>
+                                    
+                                    <button type="submit" class="review-submit-btn" id="submit-review-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Submit Review
+                                    </button>
+                                    
+                                    <p class="review-form-note">
+                                        Your review will be submitted via email and published after moderation.
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="reviews-container">
+                            <div class="reviews-header">
+                                <h3 class="reviews-title">User Reviews</h3>
+                                <span class="reviews-count">${(app.reviews || []).length} reviews</span>
+                            </div>
+                            
+                            <div class="review-list" id="review-list">
+                                ${(app.reviews || []).length > 0 ? (app.reviews || []).map((review, index) => `
+                                    <div class="review">
+                                        ${state.isAdmin ? `
+                                            <div class="review-actions">
+                                                <button class="review-action-btn edit-review-btn" data-review-index="${index}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="review-action-btn delete-review-btn" data-review-index="${index}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                        <div class="review-header">
+                                            <div class="reviewer">
+                                                <div class="reviewer-avatar ${review.avatarClass || 'avatar-male-1'}">
+                                                    ${review.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div class="reviewer-info">
+                                                    <div class="reviewer-name">${review.name}</div>
+                                                    <div class="review-date">${review.date}</div>
+                                                </div>
+                                            </div>
+                                            <div class="review-rating-display">
+                                                ${Array(5).fill().map((_, i) => `
+                                                    <i class="fas fa-star star ${i < review.rating ? 'fas' : 'far'}"></i>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                        <p class="review-content">${review.comment}</p>
+                                        
+                                        ${review.adminReply ? `
+                                            <div class="admin-reply">
+                                                <div class="admin-reply-header">
+                                                    <div class="admin-reply-icon">
+                                                        <img src="https://i.ibb.co.com/hJCt1BMP/Picsart-26-01-03-19-21-09-763.png" alt="Admin" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                                                    </div>
+                                                    <span class="admin-reply-name">MIRROR STORE Admin</span>
+                                                    <span class="review-date">${review.adminReply.date}</span>
+                                                    ${state.isAdmin ? `
+                                                        <button class="review-action-btn edit-reply-btn" data-review-index="${index}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button class="review-action-btn delete-reply-btn" data-review-index="${index}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    ` : ''}
+                                                </div>
+                                                <p class="admin-reply-content">${review.adminReply.content}</p>
+                                            </div>
+                                        ` : state.isAdmin ? `
+                                            <div class="reply-form">
+                                                <textarea class="reply-input" id="reply-input-${index}" placeholder="Write a reply as admin..."></textarea>
+                                                <div class="reply-actions">
+                                                    <button type="button" class="reply-cancel-btn" onclick="this.closest('.reply-form').style.display='none'">Cancel</button>
+                                                    <button type="button" class="reply-submit-btn" data-review-index="${index}">Reply</button>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('') : `
+                                    <div class="no-reviews">
+                                        <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                                        <p>No reviews yet. Be the first to review this app!</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            elements.detailView.innerHTML = detailHTML;
+            
+            document.getElementById('back-btn').addEventListener('click', () => {
+                state.currentView = 'home';
+                switchView('home');
+            });
+            
+            if (!state.isAdmin) {
+                document.getElementById('detail-install-btn').addEventListener('click', () => {
+                    toggleInstallApp(app.id);
+                });
+            } else {
+                if (!isFeatured && document.getElementById('detail-set-featured-btn')) {
+                    document.getElementById('detail-set-featured-btn').addEventListener('click', () => {
+                        setAsFeatured(app.id);
+                    });
+                }
+                
+                document.getElementById('detail-edit-btn').addEventListener('click', () => {
+                    editApp(app.id);
+                });
+                
+                document.getElementById('detail-delete-btn').addEventListener('click', () => {
+                    deleteApp(app.id);
+                });
+                
+                if (document.getElementById('detail-add-image-btn')) {
+                    document.getElementById('detail-add-image-btn').addEventListener('click', () => {
+                        const input = document.getElementById('detail-new-image-url');
+                        const url = input.value.trim();
+                        
+                        if (url) {
+                            addAdditionalImage(app.id, url);
+                            input.value = '';
+                        }
+                    });
+                }
+                
+                document.querySelectorAll('.remove-image-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const imageIndex = parseInt(e.target.closest('.remove-image-btn').dataset.imageIndex);
+                        removeAdditionalImage(app.id, imageIndex);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-review-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const reviewIndex = parseInt(e.target.closest('.edit-review-btn').dataset.reviewIndex);
+                        editReview(app.id, reviewIndex);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-review-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const reviewIndex = parseInt(e.target.closest('.delete-review-btn').dataset.reviewIndex);
+                        deleteReview(app.id, reviewIndex);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-reply-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const reviewIndex = parseInt(e.target.closest('.edit-reply-btn').dataset.reviewIndex);
+                        editAdminReply(app.id, reviewIndex);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-reply-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const reviewIndex = parseInt(e.target.closest('.delete-reply-btn').dataset.reviewIndex);
+                        deleteAdminReply(app.id, reviewIndex);
+                    });
+                });
+                
+                document.querySelectorAll('.reply-submit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const reviewIndex = parseInt(e.target.dataset.reviewIndex);
+                        const replyInput = document.getElementById(`reply-input-${reviewIndex}`);
+                        const replyText = replyInput.value.trim();
+                        
+                        if (replyText) {
+                            addAdminReply(app.id, reviewIndex, replyText);
+                            replyInput.value = '';
+                        }
+                    });
+                });
+            }
+            
+            // Setup review form
+            const ratingStars = document.querySelectorAll('.rating-star');
+            ratingStars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    document.getElementById('review-rating-value').value = rating;
+                    
+                    ratingStars.forEach((s, i) => {
+                        if (i < rating) {
+                            s.classList.add('active');
+                            s.classList.remove('far');
+                            s.classList.add('fas');
+                        } else {
+                            s.classList.remove('active');
+                            s.classList.remove('fas');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+            });
+            
+            const reviewForm = document.getElementById('review-form');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const nameInput = this.querySelector('input[name="reviewer_name"]');
+                    const commentInput = this.querySelector('textarea[name="review_comment"]');
+                    const ratingInput = this.querySelector('input[name="review_rating"]');
+                    
+                    if (!nameInput.value.trim() || !commentInput.value.trim()) {
+                        alert('Please fill in both name and comment fields');
+                        return;
+                    }
+                    
+                    // Add local review immediately
+                    const newReview = {
+                        id: Date.now(),
+                        name: nameInput.value.trim(),
+                        rating: parseInt(ratingInput.value),
+                        comment: commentInput.value.trim(),
+                        date: 'Just now',
+                        avatarClass: getAvatarClass(nameInput.value.trim()),
+                        adminReply: null
+                    };
+                    
+                    // Save to Firebase
+                    const success = await addReviewToFirebase(app.id, newReview);
+                    if (success) {
+                        // Update local state
+                        const appIndex = state.apps.findIndex(a => a.id === app.id);
+                        if (appIndex !== -1) {
+                            if (!state.apps[appIndex].reviews) state.apps[appIndex].reviews = [];
+                            state.apps[appIndex].reviews.unshift(newReview);
+                        }
+                        
+                        if (state.selectedApp && state.selectedApp.id === app.id) {
+                            if (!state.selectedApp.reviews) state.selectedApp.reviews = [];
+                            state.selectedApp.reviews.unshift(newReview);
+                            renderDetailView();
+                        }
+                        
+                        // Reset form
+                        nameInput.value = '';
+                        commentInput.value = '';
+                        ratingStars.forEach((s, i) => {
+                            if (i < 5) {
+                                s.classList.add('active');
+                                s.classList.remove('far');
+                                s.classList.add('fas');
+                            }
+                        });
+                        document.getElementById('review-rating-value').value = 5;
+                        
+                        showToast('Review submitted successfully!');
+                    } else {
+                        showToast('Error submitting review', 'error');
+                    }
+                });
+            }
+        }
+
+        function switchView(view) {
+            if (view === 'home') {
+                hideElement(elements.detailView);
+                showElement(elements.homeView);
+                renderApps();
+                updateFeaturedApp();
+            } else if (view === 'detail') {
+                hideElement(elements.homeView);
+                showElement(elements.detailView);
+            }
+        }
+
+        // App Management Functions
+        function toggleInstallApp(appId) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app) return;
+            
+            if (state.installedApps.has(appId)) {
+                state.installedApps.delete(appId);
+            } else {
+                // Open APK link in new tab
+                if (app.apkLink) {
+                    window.open(app.apkLink, '_blank', 'noopener,noreferrer');
+                }
+                state.installedApps.add(appId);
+            }
+            
+            if (state.currentView === 'home') {
+                renderApps();
+                updateFeaturedApp();
+            } else if (state.currentView === 'detail' && state.selectedApp && state.selectedApp.id === appId) {
+                renderDetailView();
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('installedApps', JSON.stringify(Array.from(state.installedApps)));
+        }
+
+        async function addAdditionalImage(appId, imageUrl) {
+            const appIndex = state.apps.findIndex(app => app.id === appId);
+            if (appIndex === -1) return;
+            
+            if (!state.apps[appIndex].additionalImages) {
+                state.apps[appIndex].additionalImages = [];
+            }
+            
+            state.apps[appIndex].additionalImages.push(imageUrl);
+            
+            // Update Firebase
+            try {
+                await db.collection('apps').doc(appId).update({
+                    additionalImages: firebase.firestore.FieldValue.arrayUnion(imageUrl)
+                });
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    if (!state.selectedApp.additionalImages) state.selectedApp.additionalImages = [];
+                    state.selectedApp.additionalImages.push(imageUrl);
+                    renderDetailView();
+                }
+                
+                showToast('Image added successfully!');
+            } catch (error) {
+                console.error('Error adding image:', error);
+                showToast('Error adding image', 'error');
+            }
+        }
+
+        async function removeAdditionalImage(appId, imageIndex) {
+            const appIndex = state.apps.findIndex(app => app.id === appId);
+            if (appIndex === -1) return;
+            
+            const imageUrl = state.apps[appIndex].additionalImages[imageIndex];
+            state.apps[appIndex].additionalImages.splice(imageIndex, 1);
+            
+            // Update Firebase
+            try {
+                await db.collection('apps').doc(appId).update({
+                    additionalImages: firebase.firestore.FieldValue.arrayRemove(imageUrl)
+                });
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    state.selectedApp.additionalImages.splice(imageIndex, 1);
+                    renderDetailView();
+                }
+                
+                showToast('Image removed successfully!');
+            } catch (error) {
+                console.error('Error removing image:', error);
+                showToast('Error removing image', 'error');
+            }
+        }
+
+        function editApp(appId) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app) return;
+            
+            state.editingApp = { ...app };
+            openAppModal(true);
+        }
+
+        async function deleteApp(appId) {
+            if (!confirm('Are you sure you want to delete this app?')) return;
+            
+            if (state.featuredAppId === appId) {
+                state.featuredAppId = state.apps[0]?.id || null;
+                await updateSettings('featuredAppId', state.featuredAppId);
+            }
+            
+            // Remove from recommended if exists
+            const recIndex = state.recommendedAppIds.indexOf(appId);
+            if (recIndex > -1) {
+                state.recommendedAppIds.splice(recIndex, 1);
+                await updateSettings('recommendedAppIds', state.recommendedAppIds);
+            }
+            
+            // Delete from Firebase
+            const success = await deleteAppFromFirebase(appId);
+            if (success) {
+                state.apps = state.apps.filter(app => app.id !== appId);
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    state.currentView = 'home';
+                    switchView('home');
+                }
+                
+                renderApps();
+                updateFeaturedApp();
+            }
+        }
+
+        async function setAsFeatured(appId) {
+            state.featuredAppId = appId;
+            await updateSettings('featuredAppId', appId);
+            updateFeaturedApp();
+            
+            if (state.currentView === 'home') {
+                renderApps();
+            } else if (state.currentView === 'detail' && state.selectedApp && state.selectedApp.id === appId) {
+                renderDetailView();
+            }
+            
+            showToast('App set as featured!');
+        }
+
+        // Review Management Functions
+        async function editReview(appId, reviewIndex) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app || !app.reviews || !app.reviews[reviewIndex]) return;
+            
+            const review = app.reviews[reviewIndex];
+            const newName = prompt('Edit reviewer name:', review.name);
+            const newComment = prompt('Edit comment:', review.comment);
+            const newRating = prompt('Edit rating (1-5):', review.rating);
+            
+            if (newName !== null && newComment !== null && newRating !== null) {
+                const rating = parseInt(newRating);
+                if (rating >= 1 && rating <= 5) {
+                    const updatedReview = {
+                        ...review,
+                        name: newName,
+                        comment: newComment,
+                        rating: rating
+                    };
+                    
+                    // Update Firebase
+                    const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
+                    if (success) {
+                        app.reviews[reviewIndex] = updatedReview;
+                        
+                        if (state.selectedApp && state.selectedApp.id === appId) {
+                            state.selectedApp.reviews[reviewIndex] = updatedReview;
+                            renderDetailView();
+                        }
+                        
+                        showToast('Review updated successfully!');
+                    }
+                }
+            }
+        }
+
+        async function deleteReview(appId, reviewIndex) {
+            if (!confirm('Are you sure you want to delete this review?')) return;
+            
+            const app = state.apps.find(a => a.id === appId);
+            if (!app || !app.reviews) return;
+            
+            // Delete from Firebase
+            const success = await deleteReviewFromFirebase(appId, reviewIndex);
+            if (success) {
+                app.reviews.splice(reviewIndex, 1);
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    state.selectedApp.reviews.splice(reviewIndex, 1);
+                    renderDetailView();
+                }
+                
+                showToast('Review deleted successfully!');
+            }
+        }
+
+        async function addAdminReply(appId, reviewIndex, replyText) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app || !app.reviews || !app.reviews[reviewIndex]) return;
+            
+            const updatedReview = {
+                ...app.reviews[reviewIndex],
+                adminReply: {
+                    content: replyText,
+                    date: 'Just now'
+                }
+            };
+            
+            // Update Firebase
+            const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
+            if (success) {
+                app.reviews[reviewIndex] = updatedReview;
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    state.selectedApp.reviews[reviewIndex] = updatedReview;
+                    renderDetailView();
+                }
+                
+                showToast('Reply added successfully!');
+            }
+        }
+
+        async function editAdminReply(appId, reviewIndex) {
+            const app = state.apps.find(a => a.id === appId);
+            if (!app || !app.reviews || !app.reviews[reviewIndex] || !app.reviews[reviewIndex].adminReply) return;
+            
+            const reply = app.reviews[reviewIndex].adminReply;
+            const newReply = prompt('Edit admin reply:', reply.content);
+            
+            if (newReply !== null) {
+                const updatedReview = {
+                    ...app.reviews[reviewIndex],
+                    adminReply: {
+                        ...reply,
+                        content: newReply
+                    }
+                };
+                
+                // Update Firebase
+                const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
+                if (success) {
+                    app.reviews[reviewIndex] = updatedReview;
+                    
+                    if (state.selectedApp && state.selectedApp.id === appId) {
+                        state.selectedApp.reviews[reviewIndex] = updatedReview;
+                        renderDetailView();
+                    }
+                    
+                    showToast('Reply updated successfully!');
+                }
+            }
+        }
+
+        async function deleteAdminReply(appId, reviewIndex) {
+            if (!confirm('Are you sure you want to delete this admin reply?')) return;
+            
+            const app = state.apps.find(a => a.id === appId);
+            if (!app || !app.reviews || !app.reviews[reviewIndex]) return;
+            
+            const updatedReview = {
+                ...app.reviews[reviewIndex],
+                adminReply: null
+            };
+            
+            // Update Firebase
+            const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
+            if (success) {
+                app.reviews[reviewIndex] = updatedReview;
+                
+                if (state.selectedApp && state.selectedApp.id === appId) {
+                    state.selectedApp.reviews[reviewIndex] = updatedReview;
+                    renderDetailView();
+                }
+                
+                showToast('Reply deleted successfully!');
+            }
+        }
+
+        function openFeaturedModal() {
+            elements.featuredAppsList.innerHTML = '';
+            state.selectedFeaturedAppId = state.featuredAppId;
+            
+            state.apps.forEach(app => {
+                const isSelected = app.id === state.featuredAppId;
+                const appElement = document.createElement('div');
+                appElement.className = `featured-app-item ${isSelected ? 'selected' : ''}`;
+                appElement.dataset.appId = app.id;
+                
+                appElement.innerHTML = `
+                    <div class="featured-app-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'}">
+                        ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">${app.icon || '📱'}</div>`}
+                    </div>
+                    <div class="featured-app-info">
+                        <div class="featured-app-name">${app.name}</div>
+                        <div class="featured-app-developer">${app.developer}</div>
+                    </div>
+                    ${isSelected ? '<i class="fas fa-check featured-app-check"></i>' : ''}
+                `;
+                
+                appElement.addEventListener('click', () => {
+                    document.querySelectorAll('.featured-app-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    appElement.classList.add('selected');
+                    state.selectedFeaturedAppId = app.id;
+                });
+                
+                elements.featuredAppsList.appendChild(appElement);
+            });
+            
+            showElement(elements.featuredModal);
+        }
+
+        function closeFeaturedModal() {
+            hideElement(elements.featuredModal);
+        }
+
+        function openRecommendedModal() {
+            elements.recommendedAppsList.innerHTML = '';
+            state.selectedRecommendedAppIds = [...state.recommendedAppIds];
+            
+            state.apps.forEach(app => {
+                const isSelected = state.recommendedAppIds.includes(app.id);
+                const appElement = document.createElement('div');
+                appElement.className = `featured-app-item ${isSelected ? 'selected' : ''}`;
+                appElement.dataset.appId = app.id;
+                
+                appElement.innerHTML = `
+                    <div class="featured-app-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'}">
+                        ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">${app.icon || '📱'}</div>`}
+                    </div>
+                    <div class="featured-app-info">
+                        <div class="featured-app-name">${app.name}</div>
+                        <div class="featured-app-developer">${app.developer}</div>
+                    </div>
+                    <input type="checkbox" class="recommended-checkbox" ${isSelected ? 'checked' : ''} data-app-id="${app.id}">
+                `;
+                
+                appElement.addEventListener('click', (e) => {
+                    if (e.target.type === 'checkbox') return;
+                    
+                    const checkbox = appElement.querySelector('.recommended-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    
+                    if (checkbox.checked) {
+                        appElement.classList.add('selected');
+                        if (!state.selectedRecommendedAppIds.includes(app.id)) {
+                            state.selectedRecommendedAppIds.push(app.id);
+                        }
+                    } else {
+                        appElement.classList.remove('selected');
+                        state.selectedRecommendedAppIds = state.selectedRecommendedAppIds.filter(id => id !== app.id);
+                    }
+                });
+                
+                const checkbox = appElement.querySelector('.recommended-checkbox');
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        appElement.classList.add('selected');
+                        if (!state.selectedRecommendedAppIds.includes(app.id)) {
+                            state.selectedRecommendedAppIds.push(app.id);
+                        }
+                    } else {
+                        appElement.classList.remove('selected');
+                        state.selectedRecommendedAppIds = state.selectedRecommendedAppIds.filter(id => id !== app.id);
+                    }
+                });
+                
+                elements.recommendedAppsList.appendChild(appElement);
+            });
+            
+            showElement(elements.recommendedModal);
+        }
+
+        function closeRecommendedModal() {
+            hideElement(elements.recommendedModal);
+        }
+
+        // Modal Functions - FIXED VERSION
+        function openAppModal(isEditing = false) {
+            // Reset form first
+            elements.appForm.reset();
+            
+            if (isEditing && state.editingApp) {
+                // Editing existing app
+                const app = state.editingApp;
+                
+                elements.modalTitle.textContent = 'Edit App';
+                elements.appName.value = app.name || '';
+                elements.appDeveloper.value = app.developer || '';
+                elements.appCategory.value = app.category || 'games';
+                elements.appRating.value = app.rating || 4.0;
+                elements.appDownloads.value = app.downloads || '';
+                elements.appSize.value = app.size || '';
+                elements.appVersion.value = app.version || '';
+                elements.appApkLink.value = app.apkLink || '';
+                elements.appIcon.value = app.icon || '';
+                elements.iconColor.value = app.iconColor || '#2563eb';
+                elements.appDescription.value = app.description || '';
+                
+                updateIconPreview(app.icon, app.iconColor);
+                renderScreenshots(app.screenshots || ['', '', '']);
+                renderAdditionalImages(app.additionalImages || []);
+                
+                elements.submitAppText.textContent = 'Update App';
+            } else {
+                // Adding new app
+                state.editingApp = null;
+                resetNewApp();
+                
+                elements.modalTitle.textContent = 'Add New App';
+                elements.appName.value = '';
+                elements.appDeveloper.value = '';
+                elements.appCategory.value = 'games';
+                elements.appRating.value = 4.0;
+                elements.appDownloads.value = '0';
+                elements.appSize.value = '';
+                elements.appVersion.value = '';
+                elements.appApkLink.value = '';
+                elements.appIcon.value = '';
+                elements.iconColor.value = '#2563eb';
+                elements.appDescription.value = '';
+                
+                updateIconPreview('', '#2563eb');
+                renderScreenshots(['', '', '']);
+                renderAdditionalImages([]);
+                
+                elements.submitAppText.textContent = 'Add App';
+            }
+            
+            // Update submit button state
+            updateSubmitButtonState();
+            
+            showElement(elements.appModal);
+        }
+
+        function closeAppModal() {
+            hideElement(elements.appModal);
+            state.editingApp = null;
+            resetNewApp();
+        }
+
+        function resetNewApp() {
+            state.newApp = {
+                name: '',
+                developer: '',
+                category: 'games',
+                rating: 4.0,
+                downloads: '0',
+                size: '',
+                icon: '',
+                iconColor: '#2563eb',
+                description: '',
+                screenshots: ['', '', ''],
+                version: '',
+                updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                apkLink: '',
+                additionalImages: [],
+                reviews: []
+            };
+        }
+
+        function updateIconPreview(icon, color = '#2563eb') {
+            elements.iconPreview.style.background = color;
+            if (icon && icon.startsWith('http')) {
+                elements.iconPreview.innerHTML = `<img src="${icon}" alt="App Icon" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">`;
+            } else {
+                elements.iconPreview.textContent = icon || '📱';
+            }
+        }
+
+        function renderScreenshots(screenshots) {
+            elements.screenshotsContainer.innerHTML = '';
+            
+            screenshots.forEach((ss, index) => {
+                const screenshotElement = document.createElement('div');
+                screenshotElement.className = 'screenshot-input-group';
+                
+                screenshotElement.innerHTML = `
+                    <div class="screenshot-preview">
+                        ${ss ? `<img src="${ss}" alt="Screenshot ${index + 1}">` : `
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                                <i class="fas fa-image fa-2x"></i>
+                            </div>
+                        `}
+                        <button type="button" class="remove-screenshot-btn" data-screenshot-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="form-input screenshot-url-input" data-screenshot-index="${index}" value="${ss || ''}" placeholder="Enter image URL">
+                `;
+                
+                elements.screenshotsContainer.appendChild(screenshotElement);
+            });
+            
+            elements.screenshotsContainer.querySelectorAll('.remove-screenshot-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('.remove-screenshot-btn').dataset.screenshotIndex);
+                    removeScreenshot(index);
+                });
+            });
+            
+            elements.screenshotsContainer.querySelectorAll('.screenshot-url-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const index = parseInt(e.target.dataset.screenshotIndex);
+                    updateScreenshot(index, e.target.value);
+                });
+            });
+        }
+
+        function renderAdditionalImages(additionalImages) {
+            elements.additionalImagesContainer.innerHTML = '';
+            
+            additionalImages.forEach((img, index) => {
+                const imageElement = document.createElement('div');
+                imageElement.className = 'additional-image-preview';
+                
+                imageElement.innerHTML = `
+                    <img src="${img}" alt="Additional Image ${index + 1}">
+                    <button type="button" class="remove-additional-image-btn" data-image-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                elements.additionalImagesContainer.appendChild(imageElement);
+            });
+            
+            elements.additionalImagesContainer.querySelectorAll('.remove-additional-image-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('.remove-additional-image-btn').dataset.imageIndex);
+                    removeAdditionalImageFromForm(index);
+                });
+            });
+        }
+
+        function updateScreenshot(index, url) {
+            if (state.editingApp) {
+                if (!state.editingApp.screenshots) state.editingApp.screenshots = ['', '', ''];
+                state.editingApp.screenshots[index] = url;
+            } else {
+                state.newApp.screenshots[index] = url;
+            }
+            
+            const screenshotPreview = elements.screenshotsContainer.querySelector(`[data-screenshot-index="${index}"]`).closest('.screenshot-input-group').querySelector('.screenshot-preview');
+            if (url) {
+                screenshotPreview.innerHTML = `
+                    <img src="${url}" alt="Screenshot ${index + 1}">
+                    <button type="button" class="remove-screenshot-btn" data-screenshot-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            } else {
+                screenshotPreview.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                        <i class="fas fa-image fa-2x"></i>
+                    </div>
+                    <button type="button" class="remove-screenshot-btn" data-screenshot-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }
+            
+            screenshotPreview.querySelector('.remove-screenshot-btn').addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.remove-screenshot-btn').dataset.screenshotIndex);
+                removeScreenshot(idx);
+            });
+        }
+
+        function removeScreenshot(index) {
+            if (state.editingApp) {
+                if (!state.editingApp.screenshots) state.editingApp.screenshots = ['', '', ''];
+                state.editingApp.screenshots.splice(index, 1);
+                state.editingApp.screenshots.push('');
+                renderScreenshots(state.editingApp.screenshots);
+            } else {
+                state.newApp.screenshots.splice(index, 1);
+                state.newApp.screenshots.push('');
+                renderScreenshots(state.newApp.screenshots);
+            }
+        }
+
+        function removeAdditionalImageFromForm(index) {
+            if (state.editingApp) {
+                state.editingApp.additionalImages.splice(index, 1);
+                renderAdditionalImages(state.editingApp.additionalImages);
+            } else {
+                state.newApp.additionalImages.splice(index, 1);
+                renderAdditionalImages(state.newApp.additionalImages);
+            }
+        }
+
+        async function handleAddApp() {
+            // Show loading
+            elements.submitAppText.style.display = 'none';
+            showElement(elements.submitAppLoading);
+            elements.submitAppBtn.disabled = true;
+            
+            const appData = {
+                name: elements.appName.value.trim(),
+                developer: elements.appDeveloper.value.trim(),
+                category: elements.appCategory.value,
+                rating: parseFloat(elements.appRating.value),
+                downloads: elements.appDownloads.value.trim(),
+                size: elements.appSize.value.trim(),
+                icon: elements.appIcon.value.trim(),
+                iconColor: elements.iconColor.value,
+                description: elements.appDescription.value.trim(),
+                screenshots: Array.from(elements.screenshotsContainer.querySelectorAll('.screenshot-url-input'))
+                    .map(input => input.value.trim())
+                    .filter(ss => ss !== ''),
+                version: elements.appVersion.value.trim(),
+                updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                apkLink: elements.appApkLink.value.trim(),
+                additionalImages: Array.from(elements.additionalImagesContainer.querySelectorAll('img'))
+                    .map(img => img.src)
+                    .filter(img => img && !img.includes('data:')),
+                reviews: []
+            };
+            
+            const success = await saveAppToFirebase(appData, false);
+            
+            // Hide loading
+            elements.submitAppText.style.display = 'block';
+            hideElement(elements.submitAppLoading);
+            elements.submitAppBtn.disabled = false;
+            
+            if (success) {
+                closeAppModal();
+                await loadAppsFromFirebase();
+            }
+        }
+
+        async function handleUpdateApp() {
+            if (!state.editingApp) return;
+            
+            // Show loading
+            elements.submitAppText.style.display = 'none';
+            showElement(elements.submitAppLoading);
+            elements.submitAppBtn.disabled = true;
+            
+            const updatedApp = {
+                name: elements.appName.value.trim(),
+                developer: elements.appDeveloper.value.trim(),
+                category: elements.appCategory.value,
+                rating: parseFloat(elements.appRating.value),
+                downloads: elements.appDownloads.value.trim(),
+                size: elements.appSize.value.trim(),
+                icon: elements.appIcon.value.trim(),
+                iconColor: elements.iconColor.value,
+                description: elements.appDescription.value.trim(),
+                screenshots: Array.from(elements.screenshotsContainer.querySelectorAll('.screenshot-url-input'))
+                    .map(input => input.value.trim())
+                    .filter(ss => ss !== ''),
+                version: elements.appVersion.value.trim(),
+                updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                apkLink: elements.appApkLink.value.trim(),
+                additionalImages: Array.from(elements.additionalImagesContainer.querySelectorAll('img'))
+                    .map(img => img.src)
+                    .filter(img => img && !img.includes('data:'))
+            };
+            
+            const success = await saveAppToFirebase(updatedApp, true);
+            
+            // Hide loading
+            elements.submitAppText.style.display = 'block';
+            hideElement(elements.submitAppLoading);
+            elements.submitAppBtn.disabled = false;
+            
+            if (success) {
+                closeAppModal();
+                await loadAppsFromFirebase();
+            }
+        }
+
+        // Admin Functions
+        function handleAdminLogin() {
+            const adminId = elements.adminIdInput.value.trim();
+            const passcode = elements.passcodeInput.value.trim();
+            
+            if (adminId === 'Hacker' && passcode === '444') {
+                state.isAdmin = true;
+                state.showAdminLogin = false;
+                
+                hideElement(elements.adminLoginView);
+                showElement(elements.mainAppView);
+                showElement(elements.adminControls);
+                
+                elements.adminBtn.innerHTML = '<i class="fas fa-sign-out-alt fa-lg"></i>';
+                elements.adminBtn.classList.add('admin-logout');
+                
+                elements.adminIdInput.value = '';
+                elements.passcodeInput.value = '';
+                hideElement(elements.loginError);
+                
+                renderApps();
+                updateFeaturedApp();
+                
+                if (state.currentView === 'detail') {
+                    renderDetailView();
+                }
+                
+                showToast('Admin login successful!');
+            } else {
+                elements.loginError.textContent = 'Invalid credentials. Try Again.';
+                showElement(elements.loginError);
+            }
+        }
+
+        function handleAdminLogout() {
+            state.isAdmin = false;
+            
+            hideElement(elements.adminControls);
+            
+            elements.adminBtn.innerHTML = '<i class="fas fa-cog fa-lg"></i>';
+            elements.adminBtn.classList.remove('admin-logout');
+            
+            renderApps();
+            updateFeaturedApp();
+            
+            if (state.currentView === 'detail') {
+                renderDetailView();
+            }
+            
+            showToast('Logged out successfully');
+        }
+
+        // Event Listeners - FIXED VERSION
+        function initEventListeners() {
+            elements.menuToggle.addEventListener('click', () => {
+                state.menuOpen = !state.menuOpen;
+                toggleElement(elements.mobileMenu);
+            });
+
+            elements.searchInput.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                renderApps();
+            });
+
+            elements.adminBtn.addEventListener('click', () => {
+                if (state.isAdmin) {
+                    handleAdminLogout();
+                } else {
+                    state.showAdminLogin = true;
+                    hideElement(elements.mainAppView);
+                    showElement(elements.adminLoginView);
+                }
+            });
+
+            elements.addAppBtn.addEventListener('click', () => {
+                openAppModal(false);
+            });
+
+            elements.manageFeaturedBtn.addEventListener('click', () => {
+                openFeaturedModal();
+            });
+
+            elements.manageRecommendedBtn.addEventListener('click', () => {
+                openRecommendedModal();
+            });
+
+            elements.categoryBtns.forEach(btn => {
+                if (btn.getAttribute('data-category')) {
+                    btn.addEventListener('click', (e) => {
+                        const category = e.currentTarget.getAttribute('data-category');
+                        setActiveCategory(category);
+                        
+                        if (state.menuOpen) {
+                            state.menuOpen = false;
+                            hideElement(elements.mobileMenu);
+                        }
+                    });
+                }
+            });
+
+            elements.contactBtn.addEventListener('click', () => {
+                window.open('https://vcarrd.com/shakil-mr-mirror/profile', '_blank', 'noopener,noreferrer');
+            });
+
+            elements.adminLoginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAdminLogin();
+            });
+
+            elements.backToStoreBtn.addEventListener('click', () => {
+                state.showAdminLogin = false;
+                hideElement(elements.adminLoginView);
+                showElement(elements.mainAppView);
+            });
+
+            // Form input listeners
+            elements.appIcon.addEventListener('input', (e) => {
+                const color = elements.iconColor.value;
+                updateIconPreview(e.target.value, color);
+                updateSubmitButtonState();
+            });
+
+            elements.iconColor.addEventListener('input', (e) => {
+                const color = e.target.value;
+                const icon = elements.appIcon.value;
+                updateIconPreview(icon, color);
+            });
+
+            // Required fields validation
+            const requiredFields = [elements.appName, elements.appDeveloper, elements.appIcon, elements.appApkLink];
+            requiredFields.forEach(field => {
+                field.addEventListener('input', updateSubmitButtonState);
+            });
+
+            elements.appCategory.addEventListener('change', updateSubmitButtonState);
+
+            elements.addScreenshotBtn.addEventListener('click', () => {
+                const url = elements.newScreenshotUrl.value.trim();
+                if (url) {
+                    if (state.editingApp) {
+                        if (!state.editingApp.screenshots) state.editingApp.screenshots = ['', '', ''];
+                        state.editingApp.screenshots.push(url);
+                        renderScreenshots(state.editingApp.screenshots);
+                    } else {
+                        state.newApp.screenshots.push(url);
+                        renderScreenshots(state.newApp.screenshots);
+                    }
+                    elements.newScreenshotUrl.value = '';
+                }
+            });
+
+            elements.addAdditionalImageBtn.addEventListener('click', () => {
+                const url = elements.newAdditionalImageUrl.value.trim();
+                if (url) {
+                    if (state.editingApp) {
+                        if (!state.editingApp.additionalImages) state.editingApp.additionalImages = [];
+                        state.editingApp.additionalImages.push(url);
+                        renderAdditionalImages(state.editingApp.additionalImages);
+                    } else {
+                        if (!state.newApp.additionalImages) state.newApp.additionalImages = [];
+                        state.newApp.additionalImages.push(url);
+                        renderAdditionalImages(state.newApp.additionalImages);
+                    }
+                    elements.newAdditionalImageUrl.value = '';
+                }
+            });
+
+            elements.appForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (state.editingApp) {
+                    await handleUpdateApp();
+                } else {
+                    await handleAddApp();
+                }
+            });
+
+            elements.closeModalBtn.addEventListener('click', closeAppModal);
+            elements.cancelAppBtn.addEventListener('click', closeAppModal);
+
+            elements.appModal.addEventListener('click', (e) => {
+                if (e.target === elements.appModal) {
+                    closeAppModal();
+                }
+            });
+
+            elements.closeFeaturedModalBtn.addEventListener('click', closeFeaturedModal);
+            elements.cancelFeaturedBtn.addEventListener('click', closeFeaturedModal);
+
+            elements.setFeaturedBtn.addEventListener('click', async () => {
+                if (state.selectedFeaturedAppId) {
+                    await setAsFeatured(state.selectedFeaturedAppId);
+                    closeFeaturedModal();
+                }
+            });
+
+            elements.featuredModal.addEventListener('click', (e) => {
+                if (e.target === elements.featuredModal) {
+                    closeFeaturedModal();
+                }
+            });
+
+            if (elements.closeRecommendedModalBtn) {
+                elements.closeRecommendedModalBtn.addEventListener('click', closeRecommendedModal);
+            }
+            
+            if (elements.cancelRecommendedBtn) {
+                elements.cancelRecommendedBtn.addEventListener('click', closeRecommendedModal);
+            }
+            
+            if (elements.saveRecommendedBtn) {
+                elements.saveRecommendedBtn.addEventListener('click', async () => {
+                    state.recommendedAppIds = [...state.selectedRecommendedAppIds];
+                    await updateSettings('recommendedAppIds', state.recommendedAppIds);
+                    renderApps();
+                    closeRecommendedModal();
+                    showToast('Recommended apps updated successfully!');
+                });
+            }
+            
+            if (elements.recommendedModal) {
+                elements.recommendedModal.addEventListener('click', (e) => {
+                    if (e.target === elements.recommendedModal) {
+                        closeRecommendedModal();
+                    }
+                });
+            }
+        }
+
+        function updateSubmitButtonState() {
+            const requiredFields = [
+                elements.appName.value.trim(),
+                elements.appDeveloper.value.trim(),
+                elements.appIcon.value.trim(),
+                elements.appApkLink.value.trim()
+            ];
+            
+            const allFilled = requiredFields.every(field => field !== '');
+            elements.submitAppBtn.disabled = !allFilled;
+        }
+
+        // Initialize the app
+        async function init() {
+            // Load installed apps from localStorage
+            const savedInstalledApps = localStorage.getItem('installedApps');
+            if (savedInstalledApps) {
+                state.installedApps = new Set(JSON.parse(savedInstalledApps));
+            }
+            
+            // Load data from Firebase
+            await loadAppsFromFirebase();
+            initEventListeners();
+            switchView('home');
+            
+            // Set up real-time listener for apps
+            db.collection('apps').onSnapshot((snapshot) => {
+                state.apps = [];
+                snapshot.forEach(doc => {
+                    state.apps.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                if (state.currentView === 'home') {
+                    renderApps();
+                    updateFeaturedApp();
+                } else if (state.currentView === 'detail' && state.selectedApp) {
+                    // Update selected app if it exists
+                    const updatedApp = state.apps.find(a => a.id === state.selectedApp.id);
+                    if (updatedApp) {
+                        state.selectedApp = updatedApp;
+                        renderDetailView();
+                    }
+                }
+            }, (error) => {
+                console.error('Error listening to apps:', error);
+            });
+            
+            // Set up real-time listener for settings
+            db.collection('settings').doc('appSettings').onSnapshot((doc) => {
+                if (doc.exists) {
+                    const settings = doc.data();
+                    state.featuredAppId = settings.featuredAppId || null;
+                    state.recommendedAppIds = settings.recommendedAppIds || [];
+                    
+                    if (state.currentView === 'home') {
+                        updateFeaturedApp();
+                        renderApps();
+                    }
+                }
+            }, (error) => {
+                console.error('Error listening to settings:', error);
+            });
+        }
+
+        // Start the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
