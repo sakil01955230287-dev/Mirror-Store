@@ -54,6 +54,8 @@
             align-items: center;
             gap: 8px;
             margin-right: auto;
+            position: relative;
+            overflow: hidden;
         }
 
         .logo {
@@ -61,16 +63,45 @@
             height: 32px;
             border-radius: 8px;
             object-fit: contain;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 0.6) 0%,
+                rgba(255, 255, 255, 0.2) 30%,
+                transparent 70%
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite linear;
+            animation-delay: 2s;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
         }
 
         .app-name {
             font-size: 20px;
             font-weight: 800;
-            background: linear-gradient(90deg, #3b82f6, #ffffff);
+            background: linear-gradient(90deg, #3b82f6, #ffffff, #3b82f6);
+            background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -0.5px;
+            animation: shine 3s infinite linear;
+            position: relative;
+        }
+
+        @keyframes shine {
+            0% { background-position: -100px; }
+            100% { background-position: 200px; }
         }
 
         .menu-btn {
@@ -140,6 +171,212 @@
 
         .admin-logout:hover {
             background-color: #b91c1c;
+        }
+
+        /* Notification Bell Styles */
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: #f1f5f9;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .notification-btn:hover {
+            background-color: #334155;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            border: 2px solid #1e293b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        .notification-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 380px;
+            max-width: 90vw;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            margin-top: 8px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .notification-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-panel-header {
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .notification-panel-clear {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .notification-panel-clear:hover {
+            background-color: #334155;
+            color: #cbd5e1;
+        }
+
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #334155 transparent;
+        }
+
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .notification-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .notification-item.unread {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 12px;
+            color: #94a3b8;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .notification-panel-empty {
+            padding: 40px 16px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .notification-panel-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #334155;
+            text-align: center;
+        }
+
+        .notification-view-all {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px;
+            transition: all 0.2s;
+        }
+
+        .notification-view-all:hover {
+            color: #2563eb;
+            text-decoration: underline;
         }
 
         /* Categories */
@@ -334,6 +571,11 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-wrap: break-word;
+            overflow: hidden;
         }
 
         .featured-info p {
@@ -415,11 +657,13 @@
 
         .app-name {
             font-weight: 600;
-            color: white;
             margin-bottom: 2px;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-wrap: break-word;
         }
 
         .app-developer {
@@ -836,8 +1080,25 @@
 
         .about-text {
             color: #cbd5e1;
-            line-height: 1.6;
+            line-height: 1.8;
             margin-bottom: 16px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            text-align: justify;
+        }
+        
+        .about-text p {
+            margin-bottom: 16px;
+        }
+        
+        .about-text p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .about-text strong {
+            color: #e2e8f0;
+            font-weight: 700;
         }
 
         .app-details {
@@ -949,6 +1210,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            position: relative;
         }
 
         .review-submit-btn:hover {
@@ -1306,7 +1568,7 @@
         .icon-preview img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .color-picker-group {
@@ -1538,6 +1800,11 @@
             font-weight: 600;
             color: white;
             margin-bottom: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-wrap: break-word;
+            overflow: hidden;
         }
 
         .featured-app-developer {
@@ -1548,6 +1815,58 @@
         .featured-app-check {
             color: #10b981;
             font-size: 20px;
+        }
+
+        /* Categories Management */
+        .categories-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background-color: #334155;
+            border-radius: 12px;
+            gap: 12px;
+        }
+
+        .category-item:hover {
+            background-color: #475569;
+        }
+
+        .category-item-name {
+            font-weight: 500;
+            color: white;
+            flex: 1;
+        }
+
+        .category-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .category-delete-btn {
+            padding: 6px 12px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .category-delete-btn:hover {
+            background-color: #b91c1c;
         }
 
         /* Admin Login */
@@ -1762,6 +2081,40 @@
                 opacity: 1;
             }
         }
+
+        /* Title Color Management */
+        .title-color-picker {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        .title-color-preview {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #334155;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-left: 8px;
+            border: 1px solid #475569;
+        }
     </style>
 </head>
 <body>
@@ -1815,6 +2168,25 @@
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" id="search-input" class="search-input" placeholder="Search apps & games">
                     </div>
+                    <div style="position: relative;">
+                        <button id="notification-btn" class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+                        </button>
+                        <!-- Notification Panel -->
+                        <div id="notification-panel" class="notification-panel">
+                            <div class="notification-panel-header">
+                                <span class="notification-panel-title">Notifications</span>
+                                <button id="clear-notifications-btn" class="notification-panel-clear">Clear All</button>
+                            </div>
+                            <div class="notification-list" id="notification-list">
+                                <div class="notification-panel-empty">No new notifications</div>
+                            </div>
+                            <div class="notification-panel-footer">
+                                <button id="view-all-btn" class="notification-view-all" style="display: none;">View All</button>
+                            </div>
+                        </div>
+                    </div>
                     <button id="admin-btn" class="admin-btn">
                         <i class="fas fa-cog fa-lg"></i>
                     </button>
@@ -1857,6 +2229,10 @@
                     <button id="manage-recommended-btn" class="manage-featured-btn">
                         <i class="fas fa-thumbs-up"></i>
                         Manage Recommended
+                    </button>
+                    <button id="manage-categories-btn" class="manage-featured-btn">
+                        <i class="fas fa-tag"></i>
+                        Manage Categories
                     </button>
                 </div>
             </div>
@@ -2033,6 +2409,16 @@
                         </div>
 
                         <div class="mb-4">
+                            <div class="form-group">
+                                <label for="app-title-color" class="form-label">App Title Color *</label>
+                                <input type="color" id="app-title-color" class="title-color-picker" value="#ffffff">
+                                <div id="title-color-preview" class="title-color-preview" style="background: #1e293b; color: #ffffff;">
+                                    App Title Preview
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label for="app-description" class="form-label">Description *</label>
                             <textarea id="app-description" class="form-textarea" rows="4" placeholder="Enter app description"></textarea>
                         </div>
@@ -2114,6 +2500,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Manage Categories Modal -->
+        <div id="categories-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Manage Categories</h2>
+                        <p class="modal-subtitle">Add, edit, or remove app categories</p>
+                    </div>
+                    <button id="close-categories-modal-btn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div id="categories-list" class="categories-list">
+                        <!-- Categories will be dynamically added here -->
+                    </div>
+                    <div class="form-group">
+                        <label for="new-category-name" class="form-label">Add New Category</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="new-category-name" class="form-input" placeholder="Enter category name" style="flex: 1;">
+                            <button type="button" id="add-category-btn" class="submit-btn" style="flex: 0.3; padding: 12px 16px;">
+                                <i class="fas fa-plus"></i>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="close-categories-btn" class="submit-btn">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2150,6 +2569,9 @@
             recommendedAppIds: [],
             selectedRecommendedAppIds: [],
             apps: [],
+            categories: ['Games', 'Entertainment', 'Finance', 'Technology'],
+            notifications: [],
+            notificationPanelOpen: false,
             newApp: {
                 name: '',
                 developer: '',
@@ -2159,13 +2581,17 @@
                 size: '',
                 icon: '',
                 iconColor: '#2563eb',
+                titleColor: '#ffffff',
                 description: '',
                 screenshots: ['', '', ''],
                 version: '',
                 updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
                 apkLink: '',
                 additionalImages: [],
-                reviews: []
+                reviews: [],
+                totalDownloads: 0,
+                totalRating: 0,
+                reviewCount: 0
             }
         };
 
@@ -2217,6 +2643,8 @@
             appApkLink: document.getElementById('app-apk-link'),
             appIcon: document.getElementById('app-icon'),
             iconColor: document.getElementById('icon-color'),
+            appTitleColor: document.getElementById('app-title-color'),
+            titleColorPreview: document.getElementById('title-color-preview'),
             iconPreview: document.getElementById('icon-preview'),
             appDescription: document.getElementById('app-description'),
             screenshotsContainer: document.getElementById('screenshots-container'),
@@ -2238,7 +2666,20 @@
             closeRecommendedModalBtn: document.getElementById('close-recommended-modal-btn'),
             recommendedAppsList: document.getElementById('recommended-apps-list'),
             saveRecommendedBtn: document.getElementById('save-recommended-btn'),
-            cancelRecommendedBtn: document.getElementById('cancel-recommended-btn')
+            cancelRecommendedBtn: document.getElementById('cancel-recommended-btn'),
+            manageCategoriesBtn: document.getElementById('manage-categories-btn'),
+            categoriesModal: document.getElementById('categories-modal'),
+            closeCategoriesModalBtn: document.getElementById('close-categories-modal-btn'),
+            categoriesList: document.getElementById('categories-list'),
+            newCategoryName: document.getElementById('new-category-name'),
+            addCategoryBtn: document.getElementById('add-category-btn'),
+            closeCategoriesBtn: document.getElementById('close-categories-btn'),
+            notificationBtn: document.getElementById('notification-btn'),
+            notificationPanel: document.getElementById('notification-panel'),
+            notificationList: document.getElementById('notification-list'),
+            notificationBadge: document.getElementById('notification-badge'),
+            clearNotificationsBtn: document.getElementById('clear-notifications-btn'),
+            viewAllBtn: document.getElementById('view-all-btn')
         };
 
         // Utility Functions
@@ -2254,6 +2695,122 @@
             element.classList.toggle('hidden');
         }
 
+        function addNotification(appName, appIcon, message, type = 'new_app') {
+            const notification = {
+                id: Date.now(),
+                appName: appName,
+                appIcon: appIcon,
+                message: message,
+                type: type,
+                timestamp: new Date(),
+                read: false
+            };
+
+            state.notifications.unshift(notification);
+            updateNotificationUI();
+            
+            // Auto-remove after 5 seconds if system notification
+            if (type !== 'new_app') {
+                setTimeout(() => {
+                    removeNotification(notification.id);
+                }, 5000);
+            }
+        }
+
+        function removeNotification(notificationId) {
+            state.notifications = state.notifications.filter(n => n.id !== notificationId);
+            updateNotificationUI();
+        }
+
+        function clearAllNotifications() {
+            state.notifications = [];
+            updateNotificationUI();
+            state.notificationPanelOpen = false;
+            elements.notificationPanel.classList.remove('active');
+        }
+
+        function updateNotificationUI() {
+            const badge = elements.notificationBadge;
+            const unreadCount = state.notifications.filter(n => !n.read).length;
+
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            const notificationList = elements.notificationList;
+            if (state.notifications.length === 0) {
+                notificationList.innerHTML = '<div class="notification-panel-empty">No notifications</div>';
+                elements.viewAllBtn.style.display = 'none';
+            } else {
+                notificationList.innerHTML = state.notifications.slice(0, 5).map(notif => `
+                    <div class="notification-item ${!notif.read ? 'unread' : ''}" onclick="viewNotificationApp('${notif.appName}')">
+                        <div class="notification-icon">${getNotificationIcon(notif.type)}</div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notif.appName}</div>
+                            <div class="notification-message">${notif.message}</div>
+                            <div class="notification-time">${formatNotificationTime(notif.timestamp)}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                if (state.notifications.length > 5) {
+                    elements.viewAllBtn.style.display = 'block';
+                } else {
+                    elements.viewAllBtn.style.display = 'none';
+                }
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'new_app': return '📱';
+                case 'update': return '⬆️';
+                case 'featured': return '⭐';
+                case 'download': return '⬇️';
+                default: return '📢';
+            }
+        }
+
+        function formatNotificationTime(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function viewNotificationApp(appName) {
+            const app = state.apps.find(a => a.name === appName);
+            if (app) {
+                state.selectedApp = app;
+                switchView('detail');
+                renderDetailView();
+                state.notificationPanelOpen = false;
+                elements.notificationPanel.classList.remove('active');
+            }
+        }
+
+        function toggleNotificationPanel() {
+            state.notificationPanelOpen = !state.notificationPanelOpen;
+            elements.notificationPanel.classList.toggle('active', state.notificationPanelOpen);
+
+            if (state.notificationPanelOpen) {
+                // Mark all as read
+                state.notifications.forEach(n => n.read = true);
+                updateNotificationUI();
+            }
+        }
+
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -2266,15 +2823,61 @@
             }, 3000);
         }
 
+        function formatDownloads(downloads) {
+            if (typeof downloads === 'number') {
+                if (downloads >= 1000000) {
+                    return (downloads / 1000000).toFixed(1) + 'M+';
+                } else if (downloads >= 1000) {
+                    return (downloads / 1000).toFixed(1) + 'K+';
+                }
+                return downloads.toString();
+            }
+            return downloads || '0';
+        }
+
+        function parseDownloads(downloadsStr) {
+            if (typeof downloadsStr === 'number') return downloadsStr;
+            if (!downloadsStr) return 0;
+            
+            const match = downloadsStr.match(/^([\d.]+)([MK]?)\+?$/);
+            if (match) {
+                let num = parseFloat(match[1]);
+                const unit = match[2];
+                if (unit === 'M') num *= 1000000;
+                else if (unit === 'K') num *= 1000;
+                return Math.round(num);
+            }
+            return parseInt(downloadsStr) || 0;
+        }
+
         // Firebase Functions
         async function loadAppsFromFirebase() {
             try {
                 const snapshot = await db.collection('apps').get();
                 state.apps = [];
                 snapshot.forEach(doc => {
+                    const appData = doc.data();
+                    
+                    // Ensure all reviews have dates/times
+                    if (appData.reviews && Array.isArray(appData.reviews)) {
+                        appData.reviews = appData.reviews.map(review => {
+                            if (!review.date) {
+                                // If no date, set to current date
+                                const now = new Date();
+                                const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                                const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                                review.date = `${dateStr} at ${timeStr}`;
+                            }
+                            return review;
+                        });
+                    }
+                    
                     state.apps.push({
                         id: doc.id,
-                        ...doc.data()
+                        ...appData,
+                        totalDownloads: appData.totalDownloads || parseDownloads(appData.downloads),
+                        totalRating: appData.totalRating || (appData.rating || 0),
+                        reviewCount: appData.reviewCount || (appData.reviews?.length || 0)
                     });
                 });
                 
@@ -2284,8 +2887,13 @@
                     const settings = settingsDoc.data();
                     state.featuredAppId = settings.featuredAppId || null;
                     state.recommendedAppIds = settings.recommendedAppIds || [];
+                    if (settings.categories && settings.categories.length > 0) {
+                        state.categories = settings.categories;
+                    }
                 }
                 
+                updateCategoryDropdown();
+                updateCategoryButtons();
                 renderApps();
                 updateFeaturedApp();
             } catch (error) {
@@ -2296,24 +2904,76 @@
 
         async function saveAppToFirebase(appData, isEditing = false) {
             try {
+                // Ensure numeric fields are numbers
+                const processedData = {
+                    ...appData,
+                    rating: parseFloat(appData.rating) || 0,
+                    totalDownloads: parseDownloads(appData.downloads),
+                    totalRating: appData.totalRating || appData.rating || 0,
+                    reviewCount: appData.reviewCount || (appData.reviews?.length || 0),
+                    titleColor: appData.titleColor || '#ffffff'
+                };
+
                 if (isEditing && state.editingApp) {
-                    await db.collection('apps').doc(state.editingApp.id).update(appData);
+                    await db.collection('apps').doc(state.editingApp.id).update(processedData);
                     showToast('App updated successfully!');
+                    
+                    // Send update notification
+                    addNotification(
+                        appData.name,
+                        appData.icon || '📱',
+                        `${appData.name} has been updated to version ${appData.version}`,
+                        'update'
+                    );
                 } else {
-                    // Generate new ID
                     const newId = Date.now().toString();
                     await db.collection('apps').doc(newId).set({
-                        ...appData,
+                        ...processedData,
                         id: newId,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     showToast('App added successfully!');
+                    
+                    // Send new app notification to all users
+                    addNotification(
+                        appData.name,
+                        appData.icon || '📱',
+                        `New app available! Check out ${appData.name} in the ${appData.category} category.`,
+                        'new_app'
+                    );
+
+                    // Simulate sending real push notifications
+                    sendAppNotificationToUsers(appData, 'NEW_APP');
                 }
                 return true;
             } catch (error) {
                 console.error('Error saving app:', error);
                 showToast('Error saving app', 'error');
                 return false;
+            }
+        }
+
+        async function sendAppNotificationToUsers(appData, type) {
+            try {
+                // This would send real notifications to Firebase Cloud Messaging
+                // For now, we'll just log it
+                console.log(`Sending ${type} notification for ${appData.name}:`, appData);
+                
+                // In production, you would call a Cloud Function:
+                // await fetch('/api/send-notification', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({
+                //         appId: appData.id,
+                //         appName: appData.name,
+                //         type: type,
+                //         title: `New App: ${appData.name}`,
+                //         body: appData.description || `Check out ${appData.name}!`,
+                //         icon: appData.icon
+                //     })
+                // });
+            } catch (error) {
+                console.error('Error sending notification:', error);
             }
         }
 
@@ -2342,6 +3002,16 @@
             }
         }
 
+        async function updateAppStats(appId, updates) {
+            try {
+                await db.collection('apps').doc(appId).update(updates);
+                return true;
+            } catch (error) {
+                console.error('Error updating app stats:', error);
+                return false;
+            }
+        }
+
         async function addReviewToFirebase(appId, review) {
             try {
                 const appRef = db.collection('apps').doc(appId);
@@ -2350,54 +3020,27 @@
                 if (appDoc.exists) {
                     const appData = appDoc.data();
                     const reviews = appData.reviews || [];
+                    
+                    // Add review
                     reviews.unshift(review);
                     
-                    await appRef.update({ reviews: reviews });
+                    // Update rating stats
+                    const newTotalRating = (appData.totalRating || 0) + review.rating;
+                    const newReviewCount = (appData.reviewCount || 0) + 1;
+                    const newAverageRating = (newTotalRating / newReviewCount).toFixed(1);
+                    
+                    await appRef.update({ 
+                        reviews: reviews,
+                        totalRating: newTotalRating,
+                        reviewCount: newReviewCount,
+                        rating: parseFloat(newAverageRating)
+                    });
+                    
                     return true;
                 }
                 return false;
             } catch (error) {
                 console.error('Error adding review:', error);
-                return false;
-            }
-        }
-
-        async function updateReviewInFirebase(appId, reviewIndex, review) {
-            try {
-                const appRef = db.collection('apps').doc(appId);
-                const appDoc = await appRef.get();
-                
-                if (appDoc.exists) {
-                    const appData = appDoc.data();
-                    const reviews = appData.reviews || [];
-                    reviews[reviewIndex] = review;
-                    
-                    await appRef.update({ reviews: reviews });
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('Error updating review:', error);
-                return false;
-            }
-        }
-
-        async function deleteReviewFromFirebase(appId, reviewIndex) {
-            try {
-                const appRef = db.collection('apps').doc(appId);
-                const appDoc = await appRef.get();
-                
-                if (appDoc.exists) {
-                    const appData = appDoc.data();
-                    const reviews = appData.reviews || [];
-                    reviews.splice(reviewIndex, 1);
-                    
-                    await appRef.update({ reviews: reviews });
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('Error deleting review:', error);
                 return false;
             }
         }
@@ -2441,7 +3084,8 @@
                 const query = state.searchQuery.toLowerCase();
                 result = result.filter(app => 
                     app.name.toLowerCase().includes(query) ||
-                    app.developer.toLowerCase().includes(query)
+                    app.developer.toLowerCase().includes(query) ||
+                    app.category.toLowerCase().includes(query)
                 );
             }
             
@@ -2490,18 +3134,18 @@
             
             appElement.innerHTML = `
                 <div class="app-card-content" style="display: flex; gap: 12px; width: 100%;">
-                    <div class="app-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'};">
-                        ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">` : (app.icon || '📱')}
+                    <div class="app-icon" style="background: ${app.icon && app.icon.startsWith('http') ? 'transparent' : (app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)')}; flex-shrink: 0;">
+                        ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" onload="this.style.opacity='1'" onerror="this.parentElement.style.background='linear-gradient(to bottom right, #2563eb, #1e40af)'; this.style.display='none';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; opacity: 0; transition: opacity 0.3s;">` : (app.icon || '📱')}
                     </div>
                     <div class="app-info" style="flex: 1; min-width: 0;">
-                        <div class="app-name">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24; font-size: 12px;"></i>' : ''}</div>
-                        <div class="app-developer">${app.developer}</div>
+                        <div class="app-name" style="color: ${app.titleColor || '#ffffff'};">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24; font-size: 12px;"></i>' : ''}</div>
+                        <div class="app-developer">${app.developer} <span class="category-badge">${app.category}</span></div>
                         <div class="app-meta">
                             <div class="app-rating">
                                 <span>${app.rating || '4.0'}</span>
                                 <i class="fas fa-star star-icon"></i>
                             </div>
-                            <div class="app-downloads">${app.downloads || '0'}</div>
+                            <div class="app-downloads">${formatDownloads(app.downloads)}</div>
                         </div>
                     </div>
                     <div class="app-actions">
@@ -2579,15 +3223,16 @@
             
             const isInstalled = state.installedApps.has(featuredApp.id);
             
-            elements.featuredIcon.style.background = featuredApp.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)';
+            elements.featuredIcon.style.background = featuredApp.icon && featuredApp.icon.startsWith('http') ? 'transparent' : (featuredApp.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)');
             if (featuredApp.icon && featuredApp.icon.startsWith('http')) {
-                elements.featuredIcon.innerHTML = `<img src="${featuredApp.icon}" alt="${featuredApp.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">`;
+                elements.featuredIcon.innerHTML = `<img src="${featuredApp.icon}" alt="${featuredApp.name}" onload="this.style.opacity='1'" onerror="this.parentElement.style.background='linear-gradient(to bottom right, #2563eb, #1e40af)'; this.style.display='none';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px; opacity: 0; transition: opacity 0.3s;">`;
             } else {
                 elements.featuredIcon.textContent = featuredApp.icon || '📱';
             }
             
             elements.featuredName.textContent = featuredApp.name;
-            elements.featuredDeveloper.textContent = featuredApp.developer;
+            elements.featuredName.style.color = featuredApp.titleColor || '#ffffff';
+            elements.featuredDeveloper.textContent = `${featuredApp.developer} • ${featuredApp.category}`;
             elements.featuredRating.textContent = featuredApp.rating || '4.0';
             
             elements.featuredInstallBtn.textContent = isInstalled ? 'Installed' : 'Install';
@@ -2639,12 +3284,12 @@
                 
                 <div class="detail-content">
                     <div class="detail-header-info">
-                        <div class="detail-icon" style="background: ${app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)'}">
-                            ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">` : (app.icon || '📱')}
+                        <div class="detail-icon" style="background: ${app.icon && app.icon.startsWith('http') ? 'transparent' : (app.iconColor || 'linear-gradient(to bottom right, #2563eb, #1e40af)')};  display: flex; align-items: center; justify-content: center;">
+                            ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}" onload="this.style.opacity='1'" onerror="this.parentElement.style.background='linear-gradient(to bottom right, #2563eb, #1e40af)'; this.style.display='none';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px; display: block; opacity: 0; transition: opacity 0.3s;">` : (app.icon || '📱')}
                         </div>
                         <div class="detail-text-info">
-                            <h1 class="detail-app-name">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24;"></i>' : ''}</h1>
-                            <p class="detail-developer">${app.developer}</p>
+                            <h1 class="detail-app-name" style="color: ${app.titleColor || '#ffffff'};">${app.name} ${isFeatured ? '<i class="fas fa-star" style="color: #fbbf24;"></i>' : ''}</h1>
+                            <p class="detail-developer">${app.developer} • <span class="category-badge">${app.category}</span></p>
                             <p class="detail-tags">Contains ads · In-app purchases</p>
                         </div>
                     </div>
@@ -2681,7 +3326,7 @@
                         </div>
                         <div class="stat-item">
                             <i class="fas fa-download" style="color: #60a5fa; font-size: 20px; margin-bottom: 8px;"></i>
-                            <div class="stat-value">${app.downloads || '0'}</div>
+                            <div class="stat-value">${formatDownloads(app.downloads)}</div>
                             <div class="stat-label">Downloads</div>
                         </div>
                         <div class="stat-item">
@@ -2735,9 +3380,16 @@
                     
                     <div class="about-section">
                         <h2>About this app</h2>
-                        <p class="about-text">${app.description || 'No description available.'}</p>
+                        <div class="about-text">${(app.description || 'No description available.')
+                            .split(/\n\n+/)
+                            .map(para => `<p>${para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\[(.*?)\]/g, '<strong>$1</strong>')}</p>`)
+                            .join('')}</div>
                         
                         <div class="app-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Category</span>
+                                <span class="detail-value">${app.category}</span>
+                            </div>
                             <div class="detail-row">
                                 <span class="detail-label">Updated on</span>
                                 <span class="detail-value">${app.updated || 'N/A'}</span>
@@ -2752,7 +3404,7 @@
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">Downloads</span>
-                                <span class="detail-value">${app.downloads || '0'}</span>
+                                <span class="detail-value">${formatDownloads(app.downloads)}</span>
                             </div>
                         </div>
                     </div>
@@ -2789,7 +3441,8 @@
                                     
                                     <button type="submit" class="review-submit-btn" id="submit-review-btn">
                                         <i class="fas fa-paper-plane"></i>
-                                        Submit Review
+                                        <span id="review-submit-text">Submit Review</span>
+                                        <div id="review-loading" class="loading hidden" style="width: 16px; height: 16px;"></div>
                                     </button>
                                     
                                     <p class="review-form-note">
@@ -2993,19 +3646,33 @@
                     const nameInput = this.querySelector('input[name="reviewer_name"]');
                     const commentInput = this.querySelector('textarea[name="review_comment"]');
                     const ratingInput = this.querySelector('input[name="review_rating"]');
+                    const submitBtn = this.querySelector('#submit-review-btn');
+                    const submitText = this.querySelector('#review-submit-text');
+                    const loadingSpinner = this.querySelector('#review-loading');
                     
                     if (!nameInput.value.trim() || !commentInput.value.trim()) {
                         alert('Please fill in both name and comment fields');
                         return;
                     }
                     
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    submitText.style.display = 'none';
+                    loadingSpinner.classList.remove('hidden');
+                    
+                    // Simulate loading time to prevent duplicate submissions
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
                     // Add local review immediately
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                     const newReview = {
                         id: Date.now(),
                         name: nameInput.value.trim(),
                         rating: parseInt(ratingInput.value),
                         comment: commentInput.value.trim(),
-                        date: 'Just now',
+                        date: `${dateStr} at ${timeStr}`,
                         avatarClass: getAvatarClass(nameInput.value.trim()),
                         adminReply: null
                     };
@@ -3018,11 +3685,19 @@
                         if (appIndex !== -1) {
                             if (!state.apps[appIndex].reviews) state.apps[appIndex].reviews = [];
                             state.apps[appIndex].reviews.unshift(newReview);
+                            
+                            // Update stats
+                            state.apps[appIndex].totalRating = (state.apps[appIndex].totalRating || 0) + newReview.rating;
+                            state.apps[appIndex].reviewCount = (state.apps[appIndex].reviewCount || 0) + 1;
+                            state.apps[appIndex].rating = (state.apps[appIndex].totalRating / state.apps[appIndex].reviewCount).toFixed(1);
                         }
                         
                         if (state.selectedApp && state.selectedApp.id === app.id) {
                             if (!state.selectedApp.reviews) state.selectedApp.reviews = [];
                             state.selectedApp.reviews.unshift(newReview);
+                            state.selectedApp.totalRating = (state.selectedApp.totalRating || 0) + newReview.rating;
+                            state.selectedApp.reviewCount = (state.selectedApp.reviewCount || 0) + 1;
+                            state.selectedApp.rating = (state.selectedApp.totalRating / state.selectedApp.reviewCount).toFixed(1);
                             renderDetailView();
                         }
                         
@@ -3042,6 +3717,11 @@
                     } else {
                         showToast('Error submitting review', 'error');
                     }
+                    
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitText.style.display = 'block';
+                    loadingSpinner.classList.add('hidden');
                 });
             }
         }
@@ -3059,7 +3739,7 @@
         }
 
         // App Management Functions
-        function toggleInstallApp(appId) {
+        async function toggleInstallApp(appId) {
             const app = state.apps.find(a => a.id === appId);
             if (!app) return;
             
@@ -3070,7 +3750,23 @@
                 if (app.apkLink) {
                     window.open(app.apkLink, '_blank', 'noopener,noreferrer');
                 }
+                
+                // Update download count
+                const currentDownloads = parseDownloads(app.downloads);
+                const newDownloads = currentDownloads + 1;
+                
+                // Update Firebase
+                await updateAppStats(appId, {
+                    downloads: formatDownloads(newDownloads),
+                    totalDownloads: newDownloads
+                });
+                
+                // Update local state
+                app.downloads = formatDownloads(newDownloads);
+                app.totalDownloads = newDownloads;
+                
                 state.installedApps.add(appId);
+                showToast('App installed! Download count updated.');
             }
             
             if (state.currentView === 'home') {
@@ -3211,16 +3907,45 @@
                     };
                     
                     // Update Firebase
-                    const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
-                    if (success) {
-                        app.reviews[reviewIndex] = updatedReview;
+                    try {
+                        const appRef = db.collection('apps').doc(appId);
+                        const appDoc = await appRef.get();
                         
-                        if (state.selectedApp && state.selectedApp.id === appId) {
-                            state.selectedApp.reviews[reviewIndex] = updatedReview;
-                            renderDetailView();
+                        if (appDoc.exists) {
+                            const appData = appDoc.data();
+                            const reviews = appData.reviews || [];
+                            reviews[reviewIndex] = updatedReview;
+                            
+                            // Recalculate total rating
+                            const newTotalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+                            const newAverageRating = (newTotalRating / reviews.length).toFixed(1);
+                            
+                            await appRef.update({ 
+                                reviews: reviews,
+                                totalRating: newTotalRating,
+                                reviewCount: reviews.length,
+                                rating: parseFloat(newAverageRating)
+                            });
+                            
+                            // Update local state
+                            app.reviews[reviewIndex] = updatedReview;
+                            app.totalRating = newTotalRating;
+                            app.reviewCount = reviews.length;
+                            app.rating = newAverageRating;
+                            
+                            if (state.selectedApp && state.selectedApp.id === appId) {
+                                state.selectedApp.reviews[reviewIndex] = updatedReview;
+                                state.selectedApp.totalRating = newTotalRating;
+                                state.selectedApp.reviewCount = reviews.length;
+                                state.selectedApp.rating = newAverageRating;
+                                renderDetailView();
+                            }
+                            
+                            showToast('Review updated successfully!');
                         }
-                        
-                        showToast('Review updated successfully!');
+                    } catch (error) {
+                        console.error('Error updating review:', error);
+                        showToast('Error updating review', 'error');
                     }
                 }
             }
@@ -3233,16 +3958,46 @@
             if (!app || !app.reviews) return;
             
             // Delete from Firebase
-            const success = await deleteReviewFromFirebase(appId, reviewIndex);
-            if (success) {
-                app.reviews.splice(reviewIndex, 1);
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
                 
-                if (state.selectedApp && state.selectedApp.id === appId) {
-                    state.selectedApp.reviews.splice(reviewIndex, 1);
-                    renderDetailView();
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    const deletedReview = reviews.splice(reviewIndex, 1)[0];
+                    
+                    // Recalculate total rating
+                    const newTotalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+                    const newReviewCount = reviews.length;
+                    const newAverageRating = newReviewCount > 0 ? (newTotalRating / newReviewCount).toFixed(1) : 0;
+                    
+                    await appRef.update({ 
+                        reviews: reviews,
+                        totalRating: newTotalRating,
+                        reviewCount: newReviewCount,
+                        rating: parseFloat(newAverageRating)
+                    });
+                    
+                    // Update local state
+                    app.reviews.splice(reviewIndex, 1);
+                    app.totalRating = newTotalRating;
+                    app.reviewCount = newReviewCount;
+                    app.rating = newAverageRating;
+                    
+                    if (state.selectedApp && state.selectedApp.id === appId) {
+                        state.selectedApp.reviews.splice(reviewIndex, 1);
+                        state.selectedApp.totalRating = newTotalRating;
+                        state.selectedApp.reviewCount = newReviewCount;
+                        state.selectedApp.rating = newAverageRating;
+                        renderDetailView();
+                    }
+                    
+                    showToast('Review deleted successfully!');
                 }
-                
-                showToast('Review deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showToast('Error deleting review', 'error');
             }
         }
 
@@ -3250,25 +4005,42 @@
             const app = state.apps.find(a => a.id === appId);
             if (!app || !app.reviews || !app.reviews[reviewIndex]) return;
             
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
             const updatedReview = {
                 ...app.reviews[reviewIndex],
                 adminReply: {
                     content: replyText,
-                    date: 'Just now'
+                    date: `${dateStr} at ${timeStr}`
                 }
             };
             
             // Update Firebase
-            const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
-            if (success) {
-                app.reviews[reviewIndex] = updatedReview;
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
                 
-                if (state.selectedApp && state.selectedApp.id === appId) {
-                    state.selectedApp.reviews[reviewIndex] = updatedReview;
-                    renderDetailView();
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    reviews[reviewIndex] = updatedReview;
+                    
+                    await appRef.update({ reviews: reviews });
+                    
+                    app.reviews[reviewIndex] = updatedReview;
+                    
+                    if (state.selectedApp && state.selectedApp.id === appId) {
+                        state.selectedApp.reviews[reviewIndex] = updatedReview;
+                        renderDetailView();
+                    }
+                    
+                    showToast('Reply added successfully!');
                 }
-                
-                showToast('Reply added successfully!');
+            } catch (error) {
+                console.error('Error adding reply:', error);
+                showToast('Error adding reply', 'error');
             }
         }
 
@@ -3289,16 +4061,29 @@
                 };
                 
                 // Update Firebase
-                const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
-                if (success) {
-                    app.reviews[reviewIndex] = updatedReview;
+                try {
+                    const appRef = db.collection('apps').doc(appId);
+                    const appDoc = await appRef.get();
                     
-                    if (state.selectedApp && state.selectedApp.id === appId) {
-                        state.selectedApp.reviews[reviewIndex] = updatedReview;
-                        renderDetailView();
+                    if (appDoc.exists) {
+                        const appData = appDoc.data();
+                        const reviews = appData.reviews || [];
+                        reviews[reviewIndex] = updatedReview;
+                        
+                        await appRef.update({ reviews: reviews });
+                        
+                        app.reviews[reviewIndex] = updatedReview;
+                        
+                        if (state.selectedApp && state.selectedApp.id === appId) {
+                            state.selectedApp.reviews[reviewIndex] = updatedReview;
+                            renderDetailView();
+                        }
+                        
+                        showToast('Reply updated successfully!');
                     }
-                    
-                    showToast('Reply updated successfully!');
+                } catch (error) {
+                    console.error('Error updating reply:', error);
+                    showToast('Error updating reply', 'error');
                 }
             }
         }
@@ -3315,16 +4100,29 @@
             };
             
             // Update Firebase
-            const success = await updateReviewInFirebase(appId, reviewIndex, updatedReview);
-            if (success) {
-                app.reviews[reviewIndex] = updatedReview;
+            try {
+                const appRef = db.collection('apps').doc(appId);
+                const appDoc = await appRef.get();
                 
-                if (state.selectedApp && state.selectedApp.id === appId) {
-                    state.selectedApp.reviews[reviewIndex] = updatedReview;
-                    renderDetailView();
+                if (appDoc.exists) {
+                    const appData = appDoc.data();
+                    const reviews = appData.reviews || [];
+                    reviews[reviewIndex] = updatedReview;
+                    
+                    await appRef.update({ reviews: reviews });
+                    
+                    app.reviews[reviewIndex] = updatedReview;
+                    
+                    if (state.selectedApp && state.selectedApp.id === appId) {
+                        state.selectedApp.reviews[reviewIndex] = updatedReview;
+                        renderDetailView();
+                    }
+                    
+                    showToast('Reply deleted successfully!');
                 }
-                
-                showToast('Reply deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting reply:', error);
+                showToast('Error deleting reply', 'error');
             }
         }
 
@@ -3343,8 +4141,8 @@
                         ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">${app.icon || '📱'}</div>`}
                     </div>
                     <div class="featured-app-info">
-                        <div class="featured-app-name">${app.name}</div>
-                        <div class="featured-app-developer">${app.developer}</div>
+                        <div class="featured-app-name" style="color: ${app.titleColor || '#ffffff'}">${app.name}</div>
+                        <div class="featured-app-developer">${app.developer} • ${app.category}</div>
                     </div>
                     ${isSelected ? '<i class="fas fa-check featured-app-check"></i>' : ''}
                 `;
@@ -3382,8 +4180,8 @@
                         ${app.icon && app.icon.startsWith('http') ? `<img src="${app.icon}" alt="${app.name}">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">${app.icon || '📱'}</div>`}
                     </div>
                     <div class="featured-app-info">
-                        <div class="featured-app-name">${app.name}</div>
-                        <div class="featured-app-developer">${app.developer}</div>
+                        <div class="featured-app-name" style="color: ${app.titleColor || '#ffffff'}">${app.name}</div>
+                        <div class="featured-app-developer">${app.developer} • ${app.category}</div>
                     </div>
                     <input type="checkbox" class="recommended-checkbox" ${isSelected ? 'checked' : ''} data-app-id="${app.id}">
                 `;
@@ -3428,7 +4226,210 @@
             hideElement(elements.recommendedModal);
         }
 
-        // Modal Functions - FIXED VERSION
+        // Category Management Functions
+        function openCategoriesModal() {
+            renderCategoriesList();
+            showElement(elements.categoriesModal);
+        }
+
+        function closeCategoriesModal() {
+            hideElement(elements.categoriesModal);
+            elements.newCategoryName.value = '';
+        }
+
+        function renderCategoriesList() {
+            elements.categoriesList.innerHTML = '';
+            
+            state.categories.forEach((category, index) => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'category-item';
+                categoryElement.innerHTML = `
+                    <span class="category-item-name">${category}</span>
+                    <div class="category-item-actions">
+                        <button type="button" class="category-delete-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                `;
+                
+                categoryElement.querySelector('.category-delete-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const idx = parseInt(e.target.closest('.category-delete-btn').dataset.index);
+                    deleteCategory(idx);
+                });
+                
+                elements.categoriesList.appendChild(categoryElement);
+            });
+        }
+
+        function deleteCategory(index) {
+            if (confirm(`Delete category "${state.categories[index]}"?`)) {
+                state.categories.splice(index, 1);
+                updateCategoryDropdown();
+                updateCategoryButtons();
+                renderCategoriesList();
+                saveCategoriesToFirebase();
+                showToast('Category deleted successfully!');
+            }
+        }
+
+        async function addCategory(categoryName) {
+            const trimmedName = categoryName.trim();
+            
+            if (!trimmedName) {
+                showToast('Please enter a category name', 'error');
+                return;
+            }
+            
+            if (state.categories.some(cat => cat.toLowerCase() === trimmedName.toLowerCase())) {
+                showToast('This category already exists', 'error');
+                return;
+            }
+            
+            state.categories.push(trimmedName);
+            updateCategoryDropdown();
+            updateCategoryButtons();
+            renderCategoriesList();
+            elements.newCategoryName.value = '';
+            await saveCategoriesToFirebase();
+            showToast('Category added successfully!');
+        }
+
+        function updateCategoryDropdown() {
+            // Update app form category select
+            const categorySelect = elements.appCategory;
+            categorySelect.innerHTML = '';
+            
+            state.categories.forEach((category, index) => {
+                const option = document.createElement('option');
+                option.value = category.toLowerCase().replace(/\s+/g, '');
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        function updateCategoryButtons() {
+            // Update category buttons in the header
+            const categoryBtns = document.querySelector('.categories');
+            if (!categoryBtns) return;
+            
+            // Keep the first button (All) but update the rest
+            const allBtn = categoryBtns.querySelector('[data-category="all"]');
+            if (allBtn) {
+                allBtn.parentElement.innerHTML = '';
+                categoryBtns.appendChild(allBtn);
+            }
+            
+            state.categories.forEach((category, index) => {
+                const categoryId = category.toLowerCase().replace(/\s+/g, '');
+                let btn = categoryBtns.querySelector(`[data-category="${categoryId}"]`);
+                
+                if (!btn) {
+                    btn = document.createElement('button');
+                    btn.className = 'category-btn';
+                    btn.setAttribute('data-category', categoryId);
+                    btn.innerHTML = `
+                        <i class="fas fa-${getCategoryIcon(category)}"></i>
+                        <span>${category}</span>
+                    `;
+                    
+                    btn.addEventListener('click', (e) => {
+                        setActiveCategory(categoryId);
+                        if (state.menuOpen) {
+                            state.menuOpen = false;
+                            hideElement(elements.mobileMenu);
+                        }
+                    });
+                    
+                    categoryBtns.appendChild(btn);
+                } else {
+                    btn.innerHTML = `
+                        <i class="fas fa-${getCategoryIcon(category)}"></i>
+                        <span>${category}</span>
+                    `;
+                }
+            });
+            
+            // Also update mobile menu
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                const allMenuItem = mobileMenu.querySelector('[data-category="all"]');
+                const menuItemsContainer = mobileMenu;
+                
+                // Remove old category items (keep the first two - home and contact)
+                const existingItems = menuItemsContainer.querySelectorAll('[data-category]');
+                existingItems.forEach((item, idx) => {
+                    if (idx > 0 && item.getAttribute('data-category') !== 'all' && !item.id.includes('contact')) {
+                        item.remove();
+                    }
+                });
+                
+                // Add updated category items
+                state.categories.forEach((category) => {
+                    const categoryId = category.toLowerCase().replace(/\s+/g, '');
+                    let menuItem = menuItemsContainer.querySelector(`[data-category="${categoryId}"]`);
+                    
+                    if (!menuItem) {
+                        menuItem = document.createElement('button');
+                        menuItem.className = 'menu-item';
+                        menuItem.setAttribute('data-category', categoryId);
+                        menuItem.innerHTML = `
+                            <i class="fas fa-${getCategoryIcon(category)}"></i>
+                            <span>${category}</span>
+                        `;
+                        
+                        menuItem.addEventListener('click', (e) => {
+                            setActiveCategory(categoryId);
+                            if (state.menuOpen) {
+                                state.menuOpen = false;
+                                hideElement(elements.mobileMenu);
+                            }
+                        });
+                        
+                        // Insert before contact button
+                        const contactBtn = menuItemsContainer.querySelector('#contact-btn');
+                        if (contactBtn) {
+                            menuItemsContainer.insertBefore(menuItem, contactBtn);
+                        } else {
+                            menuItemsContainer.appendChild(menuItem);
+                        }
+                    }
+                });
+            }
+        }
+
+        function getCategoryIcon(categoryName) {
+            const icons = {
+                'games': 'gamepad',
+                'entertainment': 'film',
+                'finance': 'wallet',
+                'technology': 'microchip',
+                'music': 'music',
+                'shopping': 'shopping-bag',
+                'social': 'share-alt',
+                'news': 'newspaper',
+                'productivity': 'tasks',
+                'health': 'heartbeat'
+            };
+            
+            const categoryKey = categoryName.toLowerCase().replace(/\s+/g, '');
+            return icons[categoryKey] || 'tag';
+        }
+
+        async function saveCategoriesToFirebase() {
+            try {
+                await db.collection('settings').doc('appSettings').set({
+                    categories: state.categories
+                }, { merge: true });
+                return true;
+            } catch (error) {
+                console.error('Error saving categories:', error);
+                return false;
+            }
+        }
+
+        // Modal Functions
         function openAppModal(isEditing = false) {
             // Reset form first
             elements.appForm.reset();
@@ -3448,9 +4449,11 @@
                 elements.appApkLink.value = app.apkLink || '';
                 elements.appIcon.value = app.icon || '';
                 elements.iconColor.value = app.iconColor || '#2563eb';
+                elements.appTitleColor.value = app.titleColor || '#ffffff';
                 elements.appDescription.value = app.description || '';
                 
                 updateIconPreview(app.icon, app.iconColor);
+                updateTitleColorPreview(app.titleColor);
                 renderScreenshots(app.screenshots || ['', '', '']);
                 renderAdditionalImages(app.additionalImages || []);
                 
@@ -3471,9 +4474,11 @@
                 elements.appApkLink.value = '';
                 elements.appIcon.value = '';
                 elements.iconColor.value = '#2563eb';
+                elements.appTitleColor.value = '#ffffff';
                 elements.appDescription.value = '';
                 
                 updateIconPreview('', '#2563eb');
+                updateTitleColorPreview('#ffffff');
                 renderScreenshots(['', '', '']);
                 renderAdditionalImages([]);
                 
@@ -3502,13 +4507,17 @@
                 size: '',
                 icon: '',
                 iconColor: '#2563eb',
+                titleColor: '#ffffff',
                 description: '',
                 screenshots: ['', '', ''],
                 version: '',
                 updated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
                 apkLink: '',
                 additionalImages: [],
-                reviews: []
+                reviews: [],
+                totalDownloads: 0,
+                totalRating: 0,
+                reviewCount: 0
             };
         }
 
@@ -3519,6 +4528,12 @@
             } else {
                 elements.iconPreview.textContent = icon || '📱';
             }
+        }
+
+        function updateTitleColorPreview(color = '#ffffff') {
+            elements.titleColorPreview.style.color = color;
+            elements.titleColorPreview.style.background = '#1e293b';
+            elements.titleColorPreview.textContent = `App Title (${color})`;
         }
 
         function renderScreenshots(screenshots) {
@@ -3656,6 +4671,7 @@
                 size: elements.appSize.value.trim(),
                 icon: elements.appIcon.value.trim(),
                 iconColor: elements.iconColor.value,
+                titleColor: elements.appTitleColor.value,
                 description: elements.appDescription.value.trim(),
                 screenshots: Array.from(elements.screenshotsContainer.querySelectorAll('.screenshot-url-input'))
                     .map(input => input.value.trim())
@@ -3666,7 +4682,10 @@
                 additionalImages: Array.from(elements.additionalImagesContainer.querySelectorAll('img'))
                     .map(img => img.src)
                     .filter(img => img && !img.includes('data:')),
-                reviews: []
+                reviews: [],
+                totalDownloads: parseDownloads(elements.appDownloads.value.trim()),
+                totalRating: parseFloat(elements.appRating.value),
+                reviewCount: 0
             };
             
             const success = await saveAppToFirebase(appData, false);
@@ -3699,6 +4718,7 @@
                 size: elements.appSize.value.trim(),
                 icon: elements.appIcon.value.trim(),
                 iconColor: elements.iconColor.value,
+                titleColor: elements.appTitleColor.value,
                 description: elements.appDescription.value.trim(),
                 screenshots: Array.from(elements.screenshotsContainer.querySelectorAll('.screenshot-url-input'))
                     .map(input => input.value.trim())
@@ -3708,7 +4728,10 @@
                 apkLink: elements.appApkLink.value.trim(),
                 additionalImages: Array.from(elements.additionalImagesContainer.querySelectorAll('img'))
                     .map(img => img.src)
-                    .filter(img => img && !img.includes('data:'))
+                    .filter(img => img && !img.includes('data:')),
+                totalDownloads: parseDownloads(elements.appDownloads.value.trim()),
+                totalRating: state.editingApp.totalRating || parseFloat(elements.appRating.value),
+                reviewCount: state.editingApp.reviewCount || 0
             };
             
             const success = await saveAppToFirebase(updatedApp, true);
@@ -3776,8 +4799,31 @@
             showToast('Logged out successfully');
         }
 
-        // Event Listeners - FIXED VERSION
+        // Event Listeners
         function initEventListeners() {
+            // Notification Button Listeners
+            elements.notificationBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleNotificationPanel();
+            });
+
+            elements.clearNotificationsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearAllNotifications();
+            });
+
+            // Close notification panel when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!elements.notificationPanel.contains(e.target) && 
+                    e.target !== elements.notificationBtn &&
+                    !elements.notificationBtn.contains(e.target)) {
+                    if (state.notificationPanelOpen) {
+                        state.notificationPanelOpen = false;
+                        elements.notificationPanel.classList.remove('active');
+                    }
+                }
+            });
+
             elements.menuToggle.addEventListener('click', () => {
                 state.menuOpen = !state.menuOpen;
                 toggleElement(elements.mobileMenu);
@@ -3850,6 +4896,11 @@
                 const color = e.target.value;
                 const icon = elements.appIcon.value;
                 updateIconPreview(icon, color);
+            });
+
+            elements.appTitleColor.addEventListener('input', (e) => {
+                const color = e.target.value;
+                updateTitleColorPreview(color);
             });
 
             // Required fields validation
@@ -3951,6 +5002,41 @@
                     }
                 });
             }
+
+            // Categories Modal Listeners
+            if (elements.manageCategoriesBtn) {
+                elements.manageCategoriesBtn.addEventListener('click', openCategoriesModal);
+            }
+
+            if (elements.closeCategoriesModalBtn) {
+                elements.closeCategoriesModalBtn.addEventListener('click', closeCategoriesModal);
+            }
+
+            if (elements.closeCategoriesBtn) {
+                elements.closeCategoriesBtn.addEventListener('click', closeCategoriesModal);
+            }
+
+            if (elements.addCategoryBtn) {
+                elements.addCategoryBtn.addEventListener('click', () => {
+                    const categoryName = elements.newCategoryName.value.trim();
+                    addCategory(categoryName);
+                });
+
+                elements.newCategoryName.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const categoryName = elements.newCategoryName.value.trim();
+                        addCategory(categoryName);
+                    }
+                });
+            }
+
+            if (elements.categoriesModal) {
+                elements.categoriesModal.addEventListener('click', (e) => {
+                    if (e.target === elements.categoriesModal) {
+                        closeCategoriesModal();
+                    }
+                });
+            }
         }
 
         function updateSubmitButtonState() {
@@ -3978,15 +5064,40 @@
             initEventListeners();
             switchView('home');
             
+            // Track initial apps for new app detection
+            let initialAppsLoaded = false;
+            
             // Set up real-time listener for apps
             db.collection('apps').onSnapshot((snapshot) => {
-                state.apps = [];
+                const newApps = [];
                 snapshot.forEach(doc => {
-                    state.apps.push({
+                    const appData = doc.data();
+                    const app = {
                         id: doc.id,
-                        ...doc.data()
-                    });
+                        ...appData,
+                        totalDownloads: appData.totalDownloads || parseDownloads(appData.downloads),
+                        totalRating: appData.totalRating || (appData.rating || 0),
+                        reviewCount: appData.reviewCount || (appData.reviews?.length || 0)
+                    };
+                    newApps.push(app);
+                    
+                    // Send notification for newly added apps
+                    if (initialAppsLoaded) {
+                        const wasExisting = state.apps.some(a => a.id === doc.id);
+                        if (!wasExisting) {
+                            // New app detected - send notification
+                            addNotification(
+                                app.name,
+                                app.icon || '📱',
+                                `New app available! Check out ${app.name} in the ${app.category} category.`,
+                                'new_app'
+                            );
+                        }
+                    }
                 });
+                
+                state.apps = newApps;
+                initialAppsLoaded = true;
                 
                 if (state.currentView === 'home') {
                     renderApps();
